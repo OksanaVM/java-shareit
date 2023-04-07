@@ -28,23 +28,24 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(Long userId) {
-        if (userId < 1) {
-            throw new UserNotFoundException("Id пользователя должно быть больше 0");
+        if (userId != null) {
+            userStorage.deleteUser(userId);
         }
-        userStorage.deleteUser(userId);
     }
 
-    public UserDto updateUser(Long id, UserDto userDto) {
-        User userByEmail = userStorage.getUserByEmail(userDto.getEmail());
-        if (userByEmail == null || userByEmail.getId().equals(id)) {
-            User user = UserMapper.toUserModel(userDto);
-            userStorage.updateUser(id, user);
 
-            User newUser = userStorage.getUserById(id);
-            return UserMapper.toUserDto(newUser);
-        } else {
+    public UserDto updateUser(Long id, UserDto userDto) {
+        if (userDto == null) {
+            throw new IllegalArgumentException("UserDto не может быть нулевым");
+        }
+        User userByEmail = userStorage.getUserByEmail(userDto.getEmail());
+        if (userByEmail != null && !userByEmail.getId().equals(id)) {
             throw new IncorrectUserParameterException("Такой email уже существует");
         }
+        User user = UserMapper.toUserModel(userDto);
+        userStorage.updateUser(id, user);
+        User newUser = userStorage.getUserById(id);
+        return UserMapper.toUserDto(newUser);
     }
 
     public List<UserDto> getUsersList() {

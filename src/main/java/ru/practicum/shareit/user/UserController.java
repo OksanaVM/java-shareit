@@ -14,14 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final String pathId = "/{id}";
 
     @GetMapping()
     public List<UserDto> getUsers() {
         return userService.getUsersList();
     }
 
-    @GetMapping(pathId)
+    @GetMapping("/{id}")
     public UserDto getUser(@PathVariable Long id) {
         return userService.getUser(id);
     }
@@ -31,12 +30,12 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @PatchMapping(pathId)
+    @PatchMapping("/{id}")
     public UserDto update(@PathVariable Long id, @RequestBody @NotNull UserDto user) {
         return userService.updateUser(id, user);
     }
 
-    @DeleteMapping(pathId)
+    @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }

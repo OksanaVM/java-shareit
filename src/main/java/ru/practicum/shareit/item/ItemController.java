@@ -15,14 +15,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private final String pathId = "/{id}";
 
     @GetMapping()
     public List<ItemDto> getItems(@RequestHeader(value = Variables.USER_ID) Long ownerId) {
         return itemService.getItems(ownerId);
     }
 
-    @GetMapping(pathId)
+    @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable Long id) {
         return itemService.getItem(id);
     }
@@ -38,7 +37,7 @@ public class ItemController {
         return itemService.addItem(ownerId, item);
     }
 
-    @PatchMapping(pathId)
+    @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader(value = Variables.USER_ID) Long ownerId,
                           @PathVariable Long id,
                           @Valid @RequestBody @NotNull ItemDto item) {
