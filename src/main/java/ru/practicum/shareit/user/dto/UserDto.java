@@ -8,12 +8,16 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserDto {
-    private Long id;
-    private String name;
+    private final Long id;
+    private final String name;
     @NotBlank(message = "Электронная почта не может быть пустой")
     @Email(message = "Электронная почта должна содержать символ @")
-    private String email;
+    private final String email;
+
+    public UserDto(Long id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
 }

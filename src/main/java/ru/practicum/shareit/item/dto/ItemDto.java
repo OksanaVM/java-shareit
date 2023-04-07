@@ -7,14 +7,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ItemDto {
-    private Long id;
+    private final Long id;
 
-    private String name;
+    private final String name;
 
-    private String description;
+    private final String description;
 
-    private Boolean available;
+    private final Boolean available;
 
-    private Long requestId;
+    private final Long requestId;
 
 }
