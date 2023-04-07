@@ -33,7 +33,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     public UserDto updateUser(Long id, UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("UserDto не может быть нулевым");

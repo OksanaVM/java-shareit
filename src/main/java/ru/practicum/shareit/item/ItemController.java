@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.util.Variables;
+import ru.practicum.shareit.util.HeaderConstants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -17,7 +17,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping()
-    public List<ItemDto> getItems(@RequestHeader(value = Variables.USER_ID) Long ownerId) {
+    public List<ItemDto> getItems(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId) {
         return itemService.getItems(ownerId);
     }
 
@@ -32,13 +32,13 @@ public class ItemController {
     }
 
     @PostMapping()
-    public ItemDto create(@RequestHeader(value = Variables.USER_ID) Long ownerId,
+    public ItemDto create(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
                           @Valid @RequestBody @NotNull ItemDto item) {
         return itemService.addItem(ownerId, item);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto update(@RequestHeader(value = Variables.USER_ID) Long ownerId,
+    public ItemDto update(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
                           @PathVariable Long id,
                           @Valid @RequestBody @NotNull ItemDto item) {
         return itemService.update(ownerId, id, item);
