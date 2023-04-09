@@ -21,6 +21,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(Long ownerId, ItemDto itemDto) {
+        if (ownerId == null) {
+            throw new IncorrectItemParameterException("Owner ID не может быть null");
+        }
         checkOwner(ownerId);
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             throw new IncorrectItemParameterException("Название не может быть пустой");
@@ -30,8 +33,10 @@ public class ItemServiceImpl implements ItemService {
             throw new IncorrectItemParameterException("Статус не может быть пустой");
         } else {
             Item item = ItemMapper.toItem(itemDto);
+            User user = userStorage.getUserById(ownerId);
+            item.setOwner(user);
+            Item newItem = itemStorage.addItem(item);
 
-            Item newItem = itemStorage.addItem(ownerId, item);
             return ItemMapper.toItemDto(newItem);
         }
     }
@@ -43,7 +48,10 @@ public class ItemServiceImpl implements ItemService {
         Item oldItem = itemStorage.getItem(itemId);
         if (oldItem.getOwner().getId().equals(ownerId)) {
             Item item = ItemMapper.toItem(itemDto);
-            Item newItem = itemStorage.updateUser(ownerId, itemId, item);
+            User user = userStorage.getUserById(ownerId);
+            item.setOwner(user);
+            item.setId(itemId);
+            Item newItem = itemStorage.updateUser(item);
             return ItemMapper.toItemDto(newItem);
         } else {
             throw new IncorrectOwnerParameterException("Пользователь не найден");
@@ -59,7 +67,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(Long ownerId) {
         checkOwner(ownerId);
-        return ItemMapper.toItemDtoList(itemStorage.getItems(ownerId));
+        User user = userStorage.getUserById(ownerId);
+        return ItemMapper.toItemDtoList(itemStorage.getItems(user));
     }
 
     @Override

@@ -41,13 +41,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(Long id) {
-         users.remove(id);
+        users.remove(id);
     }
 
     @Override
-    public void updateUser(Long id, User user) {
-        if (users.containsKey(id)) {
-            User existsUser = users.get(id);
+    public void updateUser(User user) {
+        if (users.containsKey(user.getId())) {
+            User existsUser = users.get(user.getId());
 
             if (user.getEmail() != null) {
                 existsUser.setEmail(user.getEmail());
@@ -57,7 +57,7 @@ public class InMemoryUserStorage implements UserStorage {
                 existsUser.setName(user.getName());
             }
 
-            users.put(id, existsUser);
+            users.put(user.getId(), existsUser);
         }
     }
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dao.UserStorage;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exceptions.IncorrectUserParameterException;
+import ru.practicum.shareit.user.exception.IncorrectUserParameterException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -32,17 +32,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public UserDto updateUser(Long id, UserDto userDto) {
+    public UserDto updateUser(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("UserDto не может быть нулевым");
         }
         User userByEmail = userStorage.getUserByEmail(userDto.getEmail());
-        if (userByEmail != null && !userByEmail.getId().equals(id)) {
+        if (userByEmail != null && !userByEmail.getId().equals(userDto.getId())) {
             throw new IncorrectUserParameterException("Такой email уже существует");
         }
         User user = UserMapper.toUserModel(userDto);
-        userStorage.updateUser(id, user);
-        User newUser = userStorage.getUserById(id);
+        userStorage.updateUser(user);
+        User newUser = userStorage.getUserById(userDto.getId());
         return UserMapper.toUserDto(newUser);
     }
 

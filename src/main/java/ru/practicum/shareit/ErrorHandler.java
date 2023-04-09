@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.item.exception.IncorrectItemParameterException;
 import ru.practicum.shareit.item.exception.IncorrectOwnerParameterException;
-import ru.practicum.shareit.user.exceptions.IncorrectUserParameterException;
-import ru.practicum.shareit.user.exceptions.UserNotFoundException;
+import ru.practicum.shareit.user.exception.IncorrectUserParameterException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 @RestControllerAdvice
 public class ErrorHandler {
