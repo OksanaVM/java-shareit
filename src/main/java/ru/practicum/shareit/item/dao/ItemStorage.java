@@ -14,5 +14,5 @@ public interface ItemStorage {
 
     Item addItem(Item item);
 
-    Item updateUser(Item item);
+    Item updateItem(Item item);
 }

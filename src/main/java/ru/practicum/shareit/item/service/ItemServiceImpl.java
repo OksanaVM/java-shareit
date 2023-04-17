@@ -52,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
             User user = userStorage.getUserById(ownerId);
             item.setOwner(user);
             item.setId(itemId);
-            Item newItem = itemStorage.updateUser(item);
+            Item newItem = itemStorage.updateItem(item);
             return ItemMapper.toItemDto(newItem);
         } else {
             throw new IncorrectOwnerParameterException("Пользователь не найден");
