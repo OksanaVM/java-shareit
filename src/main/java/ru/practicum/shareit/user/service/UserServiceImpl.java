@@ -2,60 +2,64 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dao.UserStorage;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.IncorrectUserParameterException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    //    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     public UserDto addUser(UserDto userDto) {
-        User userByEmail = userStorage.getUserByEmail(userDto.getEmail());
-        if (userByEmail == null) {
+        try {
             User user = UserMapper.toUserModel(userDto);
-            User newUser = userStorage.addUser(user);
+            User newUser = userRepository.save(user);
             return UserMapper.toUserDto(newUser);
-        } else {
-            throw new IncorrectUserParameterException("Такой email уже существует");
+        } catch ( Exception e) {
+            throw e;
         }
+
     }
 
     public void deleteUser(Long userId) {
         if (userId != null) {
-            userStorage.deleteUser(userId);
+            userRepository.deleteById(userId);
         }
     }
 
     public UserDto updateUser(UserDto userDto) {
-        if (userDto == null) {
-            throw new IllegalArgumentException("UserDto не может быть нулевым");
+        User user = userRepository.findById(userDto.getId())
+                        .orElseThrow(() -> new NotFoundException("пользователь не найден "+userDto.getId()));
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
         }
-        User userByEmail = userStorage.getUserByEmail(userDto.getEmail());
-        if (userByEmail != null && !userByEmail.getId().equals(userDto.getId())) {
-            throw new IncorrectUserParameterException("Такой email уже существует");
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
         }
-        User user = UserMapper.toUserModel(userDto);
-        userStorage.updateUser(user);
-        User newUser = userStorage.getUserById(userDto.getId());
-        return UserMapper.toUserDto(newUser);
+        userRepository.save(user);
+        return UserMapper.toUserDto(user);
     }
 
     public List<UserDto> getUsersList() {
-        return UserMapper.toUserDtoList(userStorage.getUsers());
+        return UserMapper.toUserDtoList(userRepository.findAll());
     }
 
     public UserDto getUser(Long id) {
-        User user = userStorage.getUserById(id);
-        if (user != null) {
-            return UserMapper.toUserDto(user);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return UserMapper.toUserDto(user.get());
         } else {
-            throw new IncorrectUserParameterException("Пользователь не найден");
+            throw new UserNotFoundException("Пользователь не найден");
         }
     }
 }
