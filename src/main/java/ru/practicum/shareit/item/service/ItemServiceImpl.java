@@ -112,7 +112,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(String text) {
         if (text.isBlank()) {
-            Collections.emptyList();
+            return Collections.emptyList();
         }
         return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text));
     }
