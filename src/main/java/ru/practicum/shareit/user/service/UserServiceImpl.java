@@ -3,9 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.user.dao.UserStorage;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exception.IncorrectUserParameterException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -25,7 +23,7 @@ public class UserServiceImpl implements UserService {
             User user = UserMapper.toUserModel(userDto);
             User newUser = userRepository.save(user);
             return UserMapper.toUserDto(newUser);
-        } catch ( Exception e) {
+        } catch (Exception e) {
             throw e;
         }
 
@@ -39,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     public UserDto updateUser(UserDto userDto) {
         User user = userRepository.findById(userDto.getId())
-                        .orElseThrow(() -> new NotFoundException("пользователь не найден "+userDto.getId()));
+                .orElseThrow(() -> new NotFoundException("пользователь не найден " + userDto.getId()));
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }

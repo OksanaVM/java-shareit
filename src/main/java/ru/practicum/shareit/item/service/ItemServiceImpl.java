@@ -1,14 +1,10 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
-
 import ru.practicum.shareit.booking.repository.BookingRepository;
-;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -21,31 +17,30 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
-
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
-    //    private final ItemStorage itemStorage;
-//    private final UserStorage userStorage;
+
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
-    private final UserService userService;
+
     private final CommentRepository commentRepository;
 
     @Override
     public ItemDto addItem(Long ownerId, ItemDto itemDto) {
-//        log.debug(String.valueOf(itemDto.getAvailable()));
+
         if (ownerId == null) {
             throw new IncorrectItemParameterException("Owner ID не может быть null");
         }
@@ -98,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItem(Long itemId) {
-        Item newItem = itemRepository.findById(itemId).orElseThrow(()-> new NotFoundException("Предмет не найден"));
+        Item newItem = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
         return ItemMapper.toItemDto(newItem);
     }
 
@@ -145,11 +140,7 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemOption = itemRepository.findById(itemId);
         Item item = itemOption.get();
 
-        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author).stream()
-                .filter(booking -> booking.getStatus().equals("APPROVED"))
-                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .collect(Collectors.toList());
+        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author).stream().filter(booking -> booking.getStatus().equals("APPROVED")).filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
 
         if (authorBooked.isEmpty()) {
             throw new IncorrectItemParameterException("Неверные параметры");

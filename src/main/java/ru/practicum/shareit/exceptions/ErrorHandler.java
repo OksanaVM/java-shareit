@@ -41,7 +41,8 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectBookingParameterException(final IncorrectBookingParameterException incorrectBookingParameterException) {
+    public ErrorResponse handleIncorrectBookingParameterException
+            (final IncorrectBookingParameterException incorrectBookingParameterException) {
         return new ErrorResponse(incorrectBookingParameterException.getMessage());
     }
 
@@ -60,6 +61,7 @@ public class ErrorHandler {
                 "Нет пользователя с таким ID"
         );
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
@@ -70,9 +72,11 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIncorrectParameterException(final IncorrectParameterException incorrectParameterException) {
+    public ErrorResponse handleIncorrectParameterException
+            (final IncorrectParameterException incorrectParameterException) {
         return new ErrorResponse(incorrectParameterException.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleMissingIdException(MissingIdException exception) {

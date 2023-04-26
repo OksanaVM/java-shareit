@@ -5,25 +5,26 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
-
 import ru.practicum.shareit.booking.exception.TimeDataException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.*;
-
+import ru.practicum.shareit.exceptions.IncorrectBookingParameterException;
+import ru.practicum.shareit.exceptions.IncorrectParameterException;
+import ru.practicum.shareit.exceptions.MissingIdException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
-
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
@@ -72,10 +73,10 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-        private void checkDates(BookingDto bookingDto) {
+    private void checkDates(BookingDto bookingDto) {
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
                 bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            throw new TimeDataException ("Ошибка со временем бронирования");
+            throw new TimeDataException("Ошибка со временем бронирования");
         }
     }
 
@@ -158,7 +159,7 @@ public class BookingServiceImpl implements BookingService {
                 list = bookingList.stream()
                         .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()) && booking.getEnd().isAfter(LocalDateTime.now()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
-                    .collect(Collectors.toList());
+                        .collect(Collectors.toList());
                 break;
             case CURRENT:
                 list = bookingList.stream()
