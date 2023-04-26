@@ -17,5 +17,5 @@ public interface ItemService {
     List<ItemDto> getItems(String text);
 //    Object getOwnerId(Long itemId);
 
-//    CommentDto addComment(Long itemId, Long userId, CommentDto commentDto);
+    CommentDto addComment(Long authorId, Long itemId, CommentDto commentDto);
 }

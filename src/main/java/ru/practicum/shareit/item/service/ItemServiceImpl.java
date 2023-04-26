@@ -3,13 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.mapping.Collection;
+
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
-//import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.BadRequestException;
+
+import ru.practicum.shareit.booking.repository.BookingRepository;
+;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -21,16 +20,16 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
 //    private final UserStorage userStorage;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-//    private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
     private final UserService userService;
     private final CommentRepository commentRepository;
 
@@ -117,44 +116,55 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text));
     }
 
-//    @Transactional
-//    @Override
-//    public User getOwnerId(Long itemId) {
-//        return itemRepository.findById(itemId)
-//                .orElseThrow(() -> new NotFoundException(String.format("item по id %d не найден", itemId)))
-//                .getOwner();
-//    }
-//    @Override
-//    public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {
-//        Item item = itemRepository.findById(itemId)
-//                .orElseThrow(() -> new NotFoundException(String.format("item по id %d не найден", itemId)));
-//        User user = UserMapper.toUserModel(userService.getUser(userId));
-//        LocalDateTime now = LocalDateTime.now();
-//
-//        List<Booking> bookings = bookingRepository
-//                .findAllByItem_IdAndBooker_IdAndStatusIsAndEndIsBefore(itemId, userId, BookingStatus.APPROVED, now);
-//        System.out.println(bookings);
-//        if (bookings.isEmpty()) {
-//            throw new BadRequestException(String
-//                    .format("у юзера %s нет завершенных бронирований %S", user.getName(), item.getName()));
-//        }
-//        if (bookings.get(0).getStart().isBefore(now)) {
-//            Comment comment = CommentMapper.toComment(commentDto);
-//            comment.setItem(item);
-//            comment.setAuthor(user);
-//            comment.setCreated(now);
-//            return CommentMapper.toDto(commentRepository.save(comment));
-//        } else {
-//            throw new BadRequestException(String
-//                    .format("у юзера %s нет завершенных бронирований %S", user.getName(), item.getName()));
-//        }
-//    }
+    private List<CommentDto> getComment(Item item) {
+        List<CommentDto> list = new ArrayList<>();
+        List<Comment> itemCommentList = commentRepository.findByItem(item);
+        if (itemCommentList.size() > 0) {
+            list = CommentMapper.commentDtoList(itemCommentList);
+        }
 
+        return list;
+    }
 
     private void checkOwner(Long ownerId) {
         Optional<User> user = userRepository.findById(ownerId);
         if (!user.isPresent()) {
             throw new IncorrectOwnerParameterException("Пользователь не найден");
         }
+    }
+
+    @Override
+    @Transactional
+    public CommentDto addComment(Long authorId, Long itemId, CommentDto commentDto) {
+        Optional<User> authorOption = userRepository.findById(authorId);
+        if (!authorOption.isPresent()) {
+            throw new UserNotFoundException("Автор не найден");
+        }
+        User author = authorOption.get();
+
+        Optional<Item> itemOption = itemRepository.findById(itemId);
+        Item item = itemOption.get();
+
+        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author).stream()
+                .filter(booking -> booking.getStatus().equals("APPROVED"))
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .collect(Collectors.toList());
+
+        if (authorBooked.isEmpty()) {
+            throw new IncorrectItemParameterException("Неверные параметры");
+        }
+
+        Comment comment = new Comment();
+        comment.setAuthor(author);
+        comment.setCreated(LocalDateTime.now());
+        comment.setItem(item);
+        comment.setText(commentDto.getText());
+        commentRepository.save(comment);
+
+        CommentDto newComment = CommentMapper.toCommentDto(comment);
+        newComment.setAuthorName(author.getName());
+        return newComment;
+
     }
 }

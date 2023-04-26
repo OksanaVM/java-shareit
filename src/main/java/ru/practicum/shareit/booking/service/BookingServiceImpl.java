@@ -1,26 +1,23 @@
 package ru.practicum.shareit.booking.service;
 
-import ch.qos.logback.core.status.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoShort;
-//import ru.practicum.shareit.booking.storage.BookingStorage;
-import ru.practicum.shareit.booking.exception.BookingUnavailableException;
-import ru.practicum.shareit.booking.exception.DoubleApproveException;
+
 import ru.practicum.shareit.booking.exception.TimeDataException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
-import ru.practicum.shareit.user.mapper.UserMapper;
+
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
@@ -37,8 +34,7 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final UserService userService;
-    private final ItemService itemService;
+
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 

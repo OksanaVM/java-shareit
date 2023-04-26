@@ -7,27 +7,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CommentMapper {
-    public static CommentDto toDto(Comment comment) {
-        return CommentDto.builder()
-                .id(comment.getId())
-                .text(comment.getText())
-                .item(ItemMapper.toItemDto(comment.getItem()))
-                .authorName(comment.getAuthor().getName())
-                .created(comment.getCreated())
-                .build();
+    public static CommentDto toCommentDto(Comment comment) {
+        return new CommentDto(comment.getId(),
+                comment.getText(),
+                comment.getItem(),
+                AuthorMapper.toAuthor(comment.getAuthor()),
+                comment.getAuthor().getName(),
+                comment.getCreated());
     }
 
     public static Comment toComment(CommentDto commentDto) {
-        return Comment.builder()
-                .id(commentDto.getId())
-                .text(commentDto.getText())
-                .created(commentDto.getCreated())
-                .build();
+        return new Comment(null,
+                commentDto.getText(),
+                commentDto.getItem(),
+                AuthorMapper.toUser(commentDto.getAuthor()),
+                commentDto.getCreated());
     }
 
-    public static List<CommentDto> toDtoList(List<Comment> comments) {
-        return comments.stream()
-                .map(CommentMapper::toDto)
+    public static List<CommentDto> commentDtoList(List<Comment> commentList) {
+        return commentList.stream()
+                .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
     }
 }
