@@ -88,9 +88,6 @@ public class BookingServiceImpl implements BookingService {
             User owner = item.getOwner();
             if (owner.getId().equals(ownerId)) {
                 Booking booking = bookingOption.get();
-                if (booking.getStatus().equals("APPROVED")) {
-                    throw new IncorrectBookingParameterException("Неверные параметры");
-                }
                 String status;
                 if (approved) {
                     status = "APPROVED";
