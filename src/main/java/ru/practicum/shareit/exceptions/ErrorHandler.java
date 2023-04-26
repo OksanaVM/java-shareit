@@ -18,62 +18,48 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleIncorrectOwnerParameterException(final IncorrectOwnerParameterException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleIncorrectUserParameterException(final IncorrectUserParameterException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectParameterException(final IncorrectItemParameterException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectBookingParameterException
-            (final IncorrectBookingParameterException incorrectBookingParameterException) {
+    public ErrorResponse handleIncorrectBookingParameterException(final IncorrectBookingParameterException incorrectBookingParameterException) {
         return new ErrorResponse(incorrectBookingParameterException.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleIncorrectItemException(final IncorrectItemRequestException e) {
-        return new ErrorResponse(
-                e.getMessage()
-        );
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFoundException(final UserNotFoundException e) {
-        return new ErrorResponse(
-                "Нет пользователя с таким ID"
-        );
+        return new ErrorResponse("Нет пользователя с таким ID");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
-        return new ErrorResponse(
-                "Предмет не найден"
-        );
+        return new ErrorResponse("Предмет не найден");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIncorrectParameterException
-            (final IncorrectParameterException incorrectParameterException) {
+    public ErrorResponse handleIncorrectParameterException(final IncorrectParameterException incorrectParameterException) {
         return new ErrorResponse(incorrectParameterException.getMessage());
     }
 
