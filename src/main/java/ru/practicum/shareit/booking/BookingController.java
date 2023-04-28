@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.util.HeaderConstants;
@@ -41,9 +42,7 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getBooking(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
-                                       @RequestParam(name = "state",
-                                               required = false,
-                                               defaultValue = "ALL") BookingStatus state,
+                                       @RequestParam(name = "state", required = false, defaultValue = "ALL") String state,
                                        @RequestParam(required = false, name = "from") Integer from,
                                        @RequestParam(required = false, name = "size") Integer size) {
         return bookingService.getBooking(state, ownerId, from, size);
@@ -51,7 +50,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookedItemList(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
-                                                   @RequestParam(name = "state", required = false, defaultValue = "ALL") BookingStatus state,
+                                                   @RequestParam(name = "state", defaultValue = "ALL") String state,
                                                    @RequestParam(required = false, name = "from") Integer from,
                                                    @RequestParam(required = false, name = "size") Integer size) {
         return bookingService.ownerItemsBookingLists(state, ownerId, from, size);

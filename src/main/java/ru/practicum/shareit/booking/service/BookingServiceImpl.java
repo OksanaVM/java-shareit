@@ -4,16 +4,17 @@ package ru.practicum.shareit.booking.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.exception.DoubleApproveException;
 import ru.practicum.shareit.booking.exception.TimeDataException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.IncorrectBookingParameterException;
-import ru.practicum.shareit.exceptions.IncorrectParameterException;
-import ru.practicum.shareit.exceptions.MissingIdException;
-import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.*;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -60,21 +61,25 @@ public class BookingServiceImpl implements BookingService {
             booking.setStart(bookingDto.getStart());
             booking.setEnd(bookingDto.getEnd());
             booking.setItem(item.get());
-            booking.setStatus(BookingStatus.valueOf("WAITING"));
+            booking.setStatus(BookingStatus.WAITING);
 
             bookingRepository.save(booking);
 
             return toBookingDto(booking);
 
-        } else if (!item.isPresent()) {
+        } else if (item.isEmpty()) {
             throw new IncorrectParameterException("Вещи с таким id нет");
         } else {
             throw new IncorrectBookingParameterException("Вещь недоступна");
         }
     }
-
+// 15.04 end 14.04
     private void checkDates(BookingDto bookingDto) {
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
+        LocalDateTime now = LocalDateTime.now();
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
+                bookingDto.getStart().isBefore(now) ||
+                bookingDto.getEnd().isBefore(now) ||
+                bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
                 bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new TimeDataException("Ошибка со временем бронирования");
         }
@@ -88,13 +93,16 @@ public class BookingServiceImpl implements BookingService {
             User owner = item.getOwner();
             if (owner.getId().equals(ownerId)) {
                 Booking booking = bookingOption.get();
-                String status;
-                if (approved) {
-                    status = "APPROVED";
-                } else {
-                    status = "REJECTED";
+                if (!BookingStatus.WAITING.equals(booking.getStatus())) {
+                    throw new RequestFailedException("Статус уже проставлен");
                 }
-                booking.setStatus(BookingStatus.valueOf(status));
+                BookingStatus status;
+                if (approved) {
+                    status = BookingStatus.APPROVED;
+                } else {
+                    status = BookingStatus.REJECTED;
+                }
+                booking.setStatus(BookingStatus.valueOf(String.valueOf(status)));
 
                 bookingRepository.save(booking);
                 return BookingMapper.toBookingDto(booking);
@@ -123,10 +131,10 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public List<BookingDto> getBooking(BookingStatus state, Long bookerId, Integer from, Integer size) {
+    public List<BookingDto> getBooking(String state, Long bookerId, Integer from, Integer size) {
         Optional<User> user = userRepository.findById(bookerId);
         if (user.isPresent()) {
-            List<Booking> bookingList = new ArrayList<>();
+            List<Booking> bookingList;
             if (from == null && size == null) {
                 bookingList = bookingRepository.findByBooker(user.get());
             } else if (from >= 0 && size > 0) {
@@ -142,58 +150,58 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<Booking> getBookingListByStatus(BookingStatus state, List<Booking> bookingList) {
-        List<Booking> list = new ArrayList<>();
+    private List<Booking> getBookingListByStatus(String state, List<Booking> bookingList) {
         switch (state) {
-            case PAST:
-                list = bookingList.stream()
+            case "PAST":
+                return bookingList.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                         .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
-            case FUTURE:
-                list = bookingList.stream()
+
+            case "FUTURE":
+                return bookingList.stream()
                         .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()) && booking.getEnd().isAfter(LocalDateTime.now()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
-            case CURRENT:
-                list = bookingList.stream()
+
+            case "CURRENT":
+                return bookingList.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                         .filter(booking -> booking.getEnd().isAfter(LocalDateTime.now()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
-            case WAITING:
-                list = bookingList.stream()
-                        .filter(booking -> booking.getStatus().equals("WAITING"))
+
+            case "WAITING":
+                return bookingList.stream()
+                        .filter(booking -> BookingStatus.WAITING.equals(booking.getStatus()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
-            case REJECTED:
-                list = bookingList.stream()
-                        .filter(booking -> booking.getStatus().equals("REJECTED"))
+
+            case "REJECTED":
+                return bookingList.stream()
+                        .filter(booking -> BookingStatus.REJECTED.equals(booking.getStatus()))
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
-            case ALL:
-                list = bookingList.stream()
+
+            case "ALL":
+                return bookingList.stream()
                         .sorted(Comparator.comparing(Booking::getStart).reversed())
                         .collect(Collectors.toList());
-                break;
+
         }
-        return list;
+        throw new RequestFailedException(String.format("Unknown state: %s",state));
     }
 
     @Override
-    public List<BookingDto> ownerItemsBookingLists(BookingStatus state, Long ownerId, Integer from, Integer size) {
+    public List<BookingDto> ownerItemsBookingLists(String state, Long ownerId, Integer from, Integer size) {
         Optional<User> user = userRepository.findById(ownerId);
         if (user.isPresent()) {
             List<Item> ownerItemList = itemRepository.findByOwner(user.get());
             List<Booking> bookingList = new ArrayList<>();
             ownerItemList.forEach(item -> {
-                        List<Booking> itemBookingList = new ArrayList<>();
+                        List<Booking> itemBookingList;
+
                         if (from == null && size == null) {
                             itemBookingList = bookingRepository.findByItem(item);
                         } else if (from >= 0 && size > 0) {

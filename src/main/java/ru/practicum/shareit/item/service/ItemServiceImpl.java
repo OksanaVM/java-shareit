@@ -3,7 +3,10 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -25,7 +28,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-;
+
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +100,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(newItem);
     }
 
+
     @Override
     public List<ItemDto> getItems(Long ownerId) {
         checkOwner(ownerId);
@@ -140,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemOption = itemRepository.findById(itemId);
         Item item = itemOption.get();
 
-        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author).stream().filter(booking -> booking.getStatus().equals("APPROVED")).filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
+        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author).stream().filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED)).filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
 
         if (authorBooked.isEmpty()) {
             throw new IncorrectItemParameterException("Неверные параметры");
