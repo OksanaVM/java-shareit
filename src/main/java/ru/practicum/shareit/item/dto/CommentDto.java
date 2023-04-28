@@ -9,12 +9,13 @@ import ru.practicum.shareit.item.model.Item;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
-;
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+
 public class CommentDto {
     private Long id;
 

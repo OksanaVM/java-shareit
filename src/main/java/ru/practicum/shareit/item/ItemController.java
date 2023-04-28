@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemsDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.util.HeaderConstants;
 
@@ -18,13 +19,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping()
-    public List<ItemDto> getItems(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId) {
+    public List<ItemsDto> getItems(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId) {
         return itemService.getItems(ownerId);
     }
 
     @GetMapping("/{id}")
-    public ItemDto getItem(@PathVariable Long id) {
-        return itemService.getItem(id);
+    public ItemsDto getItem(@RequestHeader(value = HeaderConstants.OWNER_ID) Long userId,
+                            @PathVariable Long id) {
+        return itemService.getItem(id, userId);
     }
 
     @GetMapping("/search")

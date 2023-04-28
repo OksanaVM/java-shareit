@@ -25,5 +25,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItemByLimits(@Param("item") Long item, @Param("from") Integer from, @Param("size") Integer size);
 
     List<Booking> findByItemAndBooker(Item item, User user);
+
+    @Query(nativeQuery = true, value = "select * from bookings " +
+            "where item_id = :itemId AND status != 'REJECTED' " +
+            "order by start_date desc")
+    List<Booking> findAllBookingsItem(@Param("itemId") Long itemId);
 }
 

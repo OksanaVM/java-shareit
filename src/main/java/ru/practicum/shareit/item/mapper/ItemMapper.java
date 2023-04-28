@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.mapper;
 
+import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemsDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -20,5 +23,9 @@ public class ItemMapper {
         return itemList.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    public static ItemsDto toItemsDto(Item item, ItemBookingInfoDto lastBooking, ItemBookingInfoDto nextBooking, List<CommentDto> comments) {
+        return new ItemsDto(item.getId(), item.getName(), item.getDescription(), item.getIsAvailable(), item.getRequestId(), lastBooking, nextBooking, comments);
     }
 }
