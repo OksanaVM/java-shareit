@@ -4,17 +4,13 @@ package ru.practicum.shareit.booking.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.exception.DoubleApproveException;
 import ru.practicum.shareit.booking.exception.TimeDataException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
-
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -73,7 +69,8 @@ public class BookingServiceImpl implements BookingService {
             throw new IncorrectBookingParameterException("Вещь недоступна");
         }
     }
-// 15.04 end 14.04
+
+    // 15.04 end 14.04
     private void checkDates(BookingDto bookingDto) {
         LocalDateTime now = LocalDateTime.now();
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
@@ -190,7 +187,7 @@ public class BookingServiceImpl implements BookingService {
                         .collect(Collectors.toList());
 
         }
-        throw new RequestFailedException(String.format("Unknown state: %s",state));
+        throw new RequestFailedException(String.format("Unknown state: %s", state));
     }
 
     @Override
