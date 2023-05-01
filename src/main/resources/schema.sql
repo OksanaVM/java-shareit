@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS items (
       is_available BOOLEAN,
       request_id BIGINT,
       owner_id BIGINT  NOT NULL,
-      CONSTRAINT pk_item PRIMARY KEY (id)
+      CONSTRAINT pk_item PRIMARY KEY (id),
+      CONSTRAINT fk_items_owner_id FOREIGN KEY (owner_id) REFERENCES users (id)
 
 );
 
@@ -30,7 +31,9 @@ CREATE TABLE IF NOT EXISTS bookings (
       item_id  BIGINT,
       booker_id BIGINT,
       status VARCHAR not null ,
-      CONSTRAINT pk_booking PRIMARY KEY (id)
+      CONSTRAINT pk_booking PRIMARY KEY (id),
+      CONSTRAINT fk_bookings_item_id FOREIGN KEY (item_id) REFERENCES items (id),
+      CONSTRAINT fk_bookings_booker_id FOREIGN KEY (booker_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS requests (
@@ -46,7 +49,9 @@ CREATE TABLE IF NOT EXISTS comments (
       item_id BIGINT,
       author_id BIGINT,
       created         TIMESTAMP WITHOUT TIME ZONE,
-      CONSTRAINT pk_comment PRIMARY KEY (id)
+      CONSTRAINT pk_comment PRIMARY KEY (id),
+      CONSTRAINT fk_comments_item_id FOREIGN KEY (item_id) REFERENCES items (id),
+      CONSTRAINT fk_comments_author_id FOREIGN KEY (author_id) REFERENCES users (id)
 );
 
 

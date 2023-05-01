@@ -8,19 +8,17 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemsDto;
-import ru.practicum.shareit.item.exception.IncorrectItemParameterException;
-import ru.practicum.shareit.item.exception.IncorrectOwnerParameterException;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -41,22 +39,22 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
-
     private final CommentRepository commentRepository;
 
+    @Transactional
     @Override
     public ItemDto addItem(Long ownerId, ItemDto itemDto) {
 
         if (ownerId == null) {
-            throw new IncorrectItemParameterException("Owner ID не может быть null");
+            throw new IncorrectEntityParameterException("Owner ID не может быть null");
         }
 
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new IncorrectItemParameterException("Название не может быть пустой");
+            throw new IncorrectEntityParameterException("Название не может быть пустой");
         } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new IncorrectItemParameterException("Описание не может быть пустой");
+            throw new IncorrectEntityParameterException("Описание не может быть пустой");
         } else if (itemDto.getAvailable() == null) {
-            throw new IncorrectItemParameterException("Статус не может быть пустой");
+            throw new IncorrectEntityParameterException("Статус не может быть пустой");
         } else {
             checkOwner(ownerId);
             Item item = ItemMapper.toItem(itemDto);
@@ -68,6 +66,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Transactional
     @Override
     public ItemDto update(Long ownerId, Long itemId, ItemDto itemDto) {
         checkOwner(ownerId);
@@ -93,17 +92,18 @@ public class ItemServiceImpl implements ItemService {
             Item newItem = itemRepository.save(item);
             return ItemMapper.toItemDto(newItem);
         } else {
-            throw new IncorrectOwnerParameterException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 
+    @Transactional
     @Override
     public ItemsDto getItem(Long itemId, Long userId) {
         Item newItem = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
         return fillWithBookingInfo(newItem, userId);
     }
 
-
+    @Transactional
     @Override
     public List<ItemsDto> getItems(Long ownerId) {
         checkOwner(ownerId);
@@ -115,7 +115,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemsDto fillWithBookingInfo(Item item, Long userId) {
-
         if (!item.getOwner().getId().equals(userId)) {
             return ItemMapper.toItemsDto(item, null, null, getComment(item));
         }
@@ -139,6 +138,7 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    @Transactional
     @Override
     public List<ItemDto> getItems(String text) {
         if (text.isBlank()) {
@@ -156,14 +156,14 @@ public class ItemServiceImpl implements ItemService {
     private void checkOwner(Long ownerId) {
         Optional<User> user = userRepository.findById(ownerId);
         if (user.isEmpty()) {
-            throw new IncorrectOwnerParameterException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 
     @Override
     @Transactional
     public CommentDto addComment(Long authorId, Long itemId, CommentDto commentDto) {
-        User author = userRepository.findById(authorId).orElseThrow(() -> new UserNotFoundException("Автор не найден"));
+        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Автор не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
 
         List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author)
@@ -173,7 +173,7 @@ public class ItemServiceImpl implements ItemService {
                 .sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
 
         if (authorBooked.isEmpty()) {
-            throw new IncorrectItemParameterException("Неверные параметры");
+            throw new IncorrectEntityParameterException("Неверные параметры");
         }
 
         Comment comment = new Comment();

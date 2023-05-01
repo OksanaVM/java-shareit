@@ -5,18 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.exception.TimeDataException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.*;
+import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.RequestFailedException;
+import ru.practicum.shareit.exceptions.TimeDataException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,10 +34,10 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toBookingDto;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public BookingDto addBooking(Long bookerId, BookingDto bookingDto) {
         checkDates(bookingDto);
@@ -44,15 +46,14 @@ public class BookingServiceImpl implements BookingService {
         if (item.isPresent() && item.get().getIsAvailable()) {
             Long ownerId = item.get().getOwner().getId();
             if (ownerId.equals(bookerId)) {
-                throw new IncorrectParameterException("Неверные параметры");
+                throw new NotFoundException("Неверные параметры");
             }
-
             Booking booking = new Booking();
             Optional<User> user = userRepository.findById(bookerId);
             if (user.isPresent()) {
                 booking.setBooker(user.get());
             } else {
-                throw new UserNotFoundException("Пользователь не найден");
+                throw new NotFoundException("Пользователь не найден");
             }
             booking.setStart(bookingDto.getStart());
             booking.setEnd(bookingDto.getEnd());
@@ -64,24 +65,20 @@ public class BookingServiceImpl implements BookingService {
             return toBookingDto(booking);
 
         } else if (item.isEmpty()) {
-            throw new IncorrectParameterException("Вещи с таким id нет");
+            throw new NotFoundException("Вещи с таким id нет");
         } else {
-            throw new IncorrectBookingParameterException("Вещь недоступна");
+            throw new IncorrectEntityParameterException("Вещь недоступна");
         }
     }
 
-    // 15.04 end 14.04
     private void checkDates(BookingDto bookingDto) {
-        LocalDateTime now = LocalDateTime.now();
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
-                bookingDto.getStart().isBefore(now) ||
-                bookingDto.getEnd().isBefore(now) ||
-                bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
                 bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new TimeDataException("Ошибка со временем бронирования");
         }
     }
 
+    @Transactional
     @Override
     public BookingDto approve(Long ownerId, Long bookingId, boolean approved) {
         Optional<Booking> bookingOption = bookingRepository.findById(bookingId);
@@ -104,13 +101,14 @@ public class BookingServiceImpl implements BookingService {
                 bookingRepository.save(booking);
                 return BookingMapper.toBookingDto(booking);
             } else {
-                throw new MissingIdException("Неверные параметры");
+                throw new NotFoundException("Неверные параметры");
             }
         } else {
-            throw new MissingIdException("Брони с такой ID нет");
+            throw new NotFoundException("Брони с такой ID нет");
         }
     }
 
+    @Transactional
     @Override
     public BookingDto getBooking(Long bookerId, Long id) {
         Optional<Booking> bookingOption = bookingRepository.findById(id);
@@ -126,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-
+    @Transactional
     @Override
     public List<BookingDto> getBooking(String state, Long bookerId, Integer from, Integer size) {
         Optional<User> user = userRepository.findById(bookerId);
@@ -137,13 +135,13 @@ public class BookingServiceImpl implements BookingService {
             } else if (from >= 0 && size > 0) {
                 bookingList = bookingRepository.findByBookerByPage(Math.toIntExact(user.get().getId()), from, size);
             } else {
-                throw new IncorrectBookingParameterException("Неверные параметры");
+                throw new NotFoundException("Неверные параметры");
             }
 
             List<Booking> list = getBookingListByStatus(state, bookingList);
             return BookingMapper.toBookingDtoList(list);
         } else {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 
@@ -190,6 +188,7 @@ public class BookingServiceImpl implements BookingService {
         throw new RequestFailedException(String.format("Unknown state: %s", state));
     }
 
+    @Transactional
     @Override
     public List<BookingDto> ownerItemsBookingLists(String state, Long ownerId, Integer from, Integer size) {
         Optional<User> user = userRepository.findById(ownerId);
@@ -204,7 +203,7 @@ public class BookingServiceImpl implements BookingService {
                         } else if (from >= 0 && size > 0) {
                             itemBookingList = bookingRepository.findByItemByLimits(item.getId(), from, size);
                         } else {
-                            throw new IncorrectBookingParameterException("Неверные параметры");
+                            throw new NotFoundException("Неверные параметры");
                         }
                         bookingList.addAll(itemBookingList);
                     }
@@ -212,7 +211,7 @@ public class BookingServiceImpl implements BookingService {
             List<Booking> list = getBookingListByStatus(state, bookingList);
             return BookingMapper.toBookingDtoList(list);
         } else {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 }

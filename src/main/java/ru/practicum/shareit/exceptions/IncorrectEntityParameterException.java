@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class IncorrectParameterException extends RuntimeException {
+public class IncorrectEntityParameterException extends RuntimeException {
     private final String parameter;
 }

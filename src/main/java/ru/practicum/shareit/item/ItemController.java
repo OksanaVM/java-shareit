@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.util.HeaderConstants;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -36,21 +35,21 @@ public class ItemController {
 
     @PostMapping()
     public ItemDto create(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
-                          @Valid @RequestBody @NotNull ItemDto item) {
+                          @Valid @RequestBody ItemDto item) {
         return itemService.addItem(ownerId, item);
     }
 
     @PatchMapping("/{id}")
     public ItemDto update(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
                           @PathVariable Long id,
-                          @Valid @RequestBody @NotNull ItemDto item) {
+                          @Valid @RequestBody ItemDto item) {
         return itemService.update(ownerId, id, item);
     }
 
     @PostMapping("/{id}/comment")
     public CommentDto addComment(@RequestHeader(value = HeaderConstants.OWNER_ID) Long authorId,
                                  @PathVariable Long id,
-                                 @Valid @RequestBody @NotNull CommentDto commentBody) {
+                                 @Valid @RequestBody CommentDto commentBody) {
         return itemService.addComment(authorId, id, commentBody);
     }
 

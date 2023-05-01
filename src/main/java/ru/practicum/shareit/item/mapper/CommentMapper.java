@@ -10,7 +10,6 @@ public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
         return new CommentDto(comment.getId(),
                 comment.getText(),
-                comment.getItem(),
                 AuthorMapper.toAuthor(comment.getAuthor()),
                 comment.getAuthor().getName(),
                 comment.getCreated());
@@ -19,7 +18,6 @@ public class CommentMapper {
     public static Comment toComment(CommentDto commentDto) {
         return new Comment(null,
                 commentDto.getText(),
-                commentDto.getItem(),
                 AuthorMapper.toUser(commentDto.getAuthor()),
                 commentDto.getCreated());
     }

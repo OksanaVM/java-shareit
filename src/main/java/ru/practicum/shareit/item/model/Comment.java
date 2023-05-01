@@ -27,4 +27,8 @@ public class Comment {
     private User author;
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
+
+
+    public Comment(Object o, String text, User toUser, LocalDateTime created) {
+    }
 }

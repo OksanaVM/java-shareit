@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.util.HeaderConstants;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -20,10 +19,9 @@ public class BookingController {
 
     @PostMapping
     public BookingDto addBooking(@RequestHeader(value = HeaderConstants.OWNER_ID) Long bookerId,
-                                 @Valid @RequestBody @NotNull BookingDto bookingDto) {
+                                 @Valid @RequestBody BookingDto bookingDto) {
         return bookingService.addBooking(bookerId, bookingDto);
     }
-
 
     @PatchMapping("/{bookingId}")
     public BookingDto updateBooking(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
