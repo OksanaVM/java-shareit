@@ -10,6 +10,8 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByOwnerId(Long userId);
 
+    List<Item> findAllByOwnerIdOrderById(Long userId);
+
     List<Item> findByOwner(User owner);
 
     @Query(nativeQuery = true, value = "SELECT * FROM items WHERE is_available = true AND " +

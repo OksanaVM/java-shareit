@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -24,11 +25,11 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 
 @Service
@@ -100,26 +101,37 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemsDto getItem(Long itemId, Long userId) {
         Item newItem = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
-        return fillWithBookingInfo(newItem, userId);
+        return fillWithBookingInfo(List.of(newItem), userId).get(0);
     }
 
     @Transactional
     @Override
     public List<ItemsDto> getItems(Long ownerId) {
         checkOwner(ownerId);
-        return itemRepository.findAllByOwnerId(ownerId)
-                .stream()
-                .map(x -> fillWithBookingInfo(x, ownerId))
-                .sorted(Comparator.comparing(ItemsDto::getId))
-                .collect(Collectors.toList());
+        return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId), ownerId);
     }
 
-    private ItemsDto fillWithBookingInfo(Item item, Long userId) {
+    private List<ItemsDto> fillWithBookingInfo(List<Item> items, Long userId) {
+        //получили все комменты и букинги
+        Map<Item, List<Comment>> comments = commentRepository.findByItemIn(items, Sort.by(DESC, "created"))
+                .stream()
+                .collect(groupingBy(Comment::getItem, toList()));
+        Map<Item, List<Booking>> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED, Sort.by(DESC, "start"))
+                .stream()
+                .collect(groupingBy(Booking::getItem, toList()));
+
+        return items.stream().map(item -> addBookingAndComment(item, userId, comments.getOrDefault(item, List.of()),
+                        bookings.getOrDefault(item, List.of())))
+                .collect(toList());
+    }
+
+
+    private ItemsDto addBookingAndComment(Item item, Long userId, List<Comment> comments, List<Booking> bookings) {
         if (!item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemsDto(item, null, null, getComment(item));
+            return ItemMapper.toItemsDto(item, null, null, CommentMapper.commentDtoList(comments));
         }
         LocalDateTime now = LocalDateTime.now();
-        List<Booking> bookings = bookingRepository.findAllBookingsItem(item.getId());
+
         Booking lastBooking = bookings.stream()
                 .filter(b -> b.getStart().isBefore(now))
                 .max(Comparator.comparing(Booking::getStart))
@@ -133,9 +145,7 @@ public class ItemServiceImpl implements ItemService {
                 ? BookingMapper.toItemBookingInfoDto(lastBooking) : null;
         ItemBookingInfoDto nextBookingDto = nextBooking != null
                 ? BookingMapper.toItemBookingInfoDto(nextBooking) : null;
-        return ItemMapper.toItemsDto(item, lastBookingDto, nextBookingDto, getComment(item));
-
-
+        return ItemMapper.toItemsDto(item, lastBookingDto, nextBookingDto, CommentMapper.commentDtoList(comments));
     }
 
     @Transactional
@@ -170,7 +180,7 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED))
                 .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
+                .sorted(Comparator.comparing(Booking::getStart).reversed()).collect(toList());
 
         if (authorBooked.isEmpty()) {
             throw new IncorrectEntityParameterException("Неверные параметры");
