@@ -1,11 +1,13 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.util.HeaderConstants;
 
-import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @RestController
@@ -19,7 +21,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDto addBooking(@RequestHeader(value = HeaderConstants.OWNER_ID) Long bookerId,
-                                 @Valid @RequestBody BookingDto bookingDto) {
+                                 @Validated @RequestBody BookingDtoShort bookingDto) {
         return bookingService.addBooking(bookerId, bookingDto);
     }
 
@@ -37,18 +39,14 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getBooking(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
-                                       @RequestParam(name = "state", required = false, defaultValue = "ALL") String state,
-                                       @RequestParam(required = false, name = "from") Integer from,
-                                       @RequestParam(required = false, name = "size") Integer size) {
-        return bookingService.getBooking(state, ownerId, from, size);
+    public List<BookingDto> getBooking(@RequestParam(defaultValue = "ALL") String state,
+                                       @NotEmpty @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
+        return bookingService.getBooking(state, userId);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getOwnerBookedItemList(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
-                                                   @RequestParam(name = "state", defaultValue = "ALL") String state,
-                                                   @RequestParam(required = false, name = "from") Integer from,
-                                                   @RequestParam(required = false, name = "size") Integer size) {
-        return bookingService.ownerItemsBookingLists(state, ownerId, from, size);
+    public List<BookingDto> getOwnerBookedItemList(@RequestParam(defaultValue = "ALL") String state,
+                                                   @NotEmpty @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
+        return bookingService.ownerItemsBookingLists(state, userId);
     }
 }

@@ -38,13 +38,13 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(UserDto userDto) {
         User user = userRepository.findById(userDto.getId())
                 .orElseThrow(() -> new NotFoundException("пользователь не найден " + userDto.getId()));
-        if (userDto.getName() != null) {
+
+        if (userDto.getName() != null && !(userDto.getName().isBlank())) {
             user.setName(userDto.getName());
         }
-        if (userDto.getEmail() != null) {
+        if (userDto.getEmail() != null && !(userDto.getEmail().isBlank())) {
             user.setEmail(userDto.getEmail());
         }
-        userRepository.save(user);
         return UserMapper.toUserDto(user);
     }
 

@@ -1,11 +1,15 @@
 package ru.practicum.shareit.booking.model;
 
-public enum BookingState {
-    ALL,
-    CURRENT,
-    PAST,
-    FUTURE,
-    WAITING,
-    REJECTED
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
+public enum BookingState {
+    ALL("ALL"),
+    CURRENT("CURRENT"),
+    PAST("PAST"),
+    FUTURE("FUTURE"),
+    WAITING("WAITING"),
+    REJECTED("REJECTED");
+
+    public final String label;
 }

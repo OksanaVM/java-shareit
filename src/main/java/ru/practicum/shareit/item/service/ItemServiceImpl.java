@@ -80,10 +80,10 @@ public class ItemServiceImpl implements ItemService {
             if (item.getIsAvailable() == null) {
                 item.setIsAvailable(oldItem.getIsAvailable());
             }
-            if (item.getName() == null) {
+            if (item.getName() == null || item.getName().isBlank()) {
                 item.setName(oldItem.getName());
             }
-            if (item.getDescription() == null) {
+            if (item.getDescription() == null || item.getDescription().isBlank()) {
                 item.setDescription(oldItem.getDescription());
             }
             if (item.getRequestId() == null) {
