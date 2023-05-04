@@ -159,10 +159,8 @@ public class ItemServiceImpl implements ItemService {
 
 
     private void checkOwner(Long ownerId) {
-        Optional<User> user = userRepository.findById(ownerId);
-        if (user.isEmpty()) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     @Override
