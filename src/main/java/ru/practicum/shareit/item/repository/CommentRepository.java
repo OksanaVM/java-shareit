@@ -9,7 +9,6 @@ import java.util.List;
 
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    List<Comment> findByItem(Item item);
 
     List<Comment> findByItemIn(List<Item> items, Sort created);
 }

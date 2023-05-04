@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,17 +14,13 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByItemAndBooker(Item item, User user);
-
-    @Query(nativeQuery = true, value = "select * from bookings " +
-            "where item_id = :itemId AND status != 'REJECTED' " +
-            "order by start_date desc")
-    List<Booking> findAllBookingsItem(@Param("itemId") Long itemId);
+    @Query("select b from Booking as b join User as u on b.booker = u.id " +
+            "where b.item = ?1 and b.status = ?2 and u.id = ?3 and b.end < ?4")
+    List<Booking> findBookingsByItem(Item item, BookingStatus status, Long idUser, LocalDateTime dateTime);
 
     @Query("select b from Booking b " +
             "where b.item.owner.id = ?1 order by b.start desc ")
     List<Booking> findAllByOwnerItems(@Param("owner") long ownerId);
-
 
     @Query(nativeQuery = true, value = "select * from bookings b " +
             "inner join items i on b.item_id = i.id " +

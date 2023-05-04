@@ -13,13 +13,9 @@ import java.util.List;
 @Builder
 public class ItemsDto {
     private final Long id;
-
     private final String name;
-
     private final String description;
-
     private final Boolean available;
-
     private final Long requestId;
     private final ItemBookingInfoDto lastBooking;
     private final ItemBookingInfoDto nextBooking;

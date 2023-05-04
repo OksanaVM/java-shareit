@@ -15,13 +15,6 @@ public class CommentMapper {
                 comment.getCreated());
     }
 
-    public static Comment toComment(CommentDto commentDto) {
-        return new Comment(null,
-                commentDto.getText(),
-                AuthorMapper.toUser(commentDto.getAuthor()),
-                commentDto.getCreated());
-    }
-
     public static List<CommentDto> commentDtoList(List<Comment> commentList) {
         return commentList.stream()
                 .map(CommentMapper::toCommentDto)

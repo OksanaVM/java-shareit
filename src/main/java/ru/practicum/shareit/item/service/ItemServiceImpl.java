@@ -157,11 +157,6 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text));
     }
 
-    private List<CommentDto> getComment(Item item) {
-        List<Comment> itemCommentList = commentRepository.findByItem(item);
-        return CommentMapper.commentDtoList(itemCommentList);
-
-    }
 
     private void checkOwner(Long ownerId) {
         Optional<User> user = userRepository.findById(ownerId);
@@ -173,28 +168,22 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public CommentDto addComment(Long authorId, Long itemId, CommentDto commentDto) {
-        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException("Автор не найден"));
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
-
-        List<Booking> authorBooked = bookingRepository.findByItemAndBooker(item, author)
-                .stream()
-                .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED))
-                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
-                .sorted(Comparator.comparing(Booking::getStart).reversed()).collect(toList());
-
+        User user = userRepository.findById(authorId).orElseThrow(() ->
+                new NotFoundException("Автор не найден"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("Предмет не найден"));
+        List<Booking> authorBooked = bookingRepository.findBookingsByItem(item, BookingStatus.APPROVED, authorId, LocalDateTime.now());
         if (authorBooked.isEmpty()) {
             throw new IncorrectEntityParameterException("Неверные параметры");
         }
-
         Comment comment = new Comment();
-        comment.setAuthor(author);
+        comment.setAuthor(user);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
         comment.setText(commentDto.getText());
         commentRepository.save(comment);
-
         CommentDto newComment = CommentMapper.toCommentDto(comment);
-        newComment.setAuthorName(author.getName());
+        newComment.setAuthorName(user.getName());
         return newComment;
 
     }

@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.util.HeaderConstants;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @RestController
@@ -40,13 +39,13 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getBooking(@RequestParam(defaultValue = "ALL") String state,
-                                       @NotEmpty @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
+                                       @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
         return bookingService.getBooking(state, userId);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookedItemList(@RequestParam(defaultValue = "ALL") String state,
-                                                   @NotEmpty @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
+                                                   @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
         return bookingService.ownerItemsBookingLists(state, userId);
     }
 }
