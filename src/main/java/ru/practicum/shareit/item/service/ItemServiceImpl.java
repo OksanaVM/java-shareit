@@ -111,43 +111,6 @@ public class ItemServiceImpl implements ItemService {
         return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId), ownerId);
     }
 
-    private List<ItemsDto> fillWithBookingInfo(List<Item> items, Long userId) {
-        //получили все комменты и букинги
-        Map<Item, List<Comment>> comments = commentRepository.findByItemIn(items, Sort.by(DESC, "created"))
-                .stream()
-                .collect(groupingBy(Comment::getItem, toList()));
-        Map<Item, List<Booking>> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED, Sort.by(DESC, "start"))
-                .stream()
-                .collect(groupingBy(Booking::getItem, toList()));
-
-        return items.stream().map(item -> addBookingAndComment(item, userId, comments.getOrDefault(item, List.of()),
-                        bookings.getOrDefault(item, List.of())))
-                .collect(toList());
-    }
-
-
-    private ItemsDto addBookingAndComment(Item item, Long userId, List<Comment> comments, List<Booking> bookings) {
-        if (!item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemsDto(item, null, null, CommentMapper.commentDtoList(comments));
-        }
-        LocalDateTime now = LocalDateTime.now();
-
-        Booking lastBooking = bookings.stream()
-                .filter(b -> b.getStart().isBefore(now))
-                .max(Comparator.comparing(Booking::getStart))
-                .orElse(null);
-        Booking nextBooking = bookings.stream()
-                .filter(b -> b.getStart().isAfter(now))
-                .min(Comparator.comparing(Booking::getStart))
-                .orElse(null);
-
-        ItemBookingInfoDto lastBookingDto = lastBooking != null
-                ? BookingMapper.toItemBookingInfoDto(lastBooking) : null;
-        ItemBookingInfoDto nextBookingDto = nextBooking != null
-                ? BookingMapper.toItemBookingInfoDto(nextBooking) : null;
-        return ItemMapper.toItemsDto(item, lastBookingDto, nextBookingDto, CommentMapper.commentDtoList(comments));
-    }
-
     @Transactional
     @Override
     public List<ItemDto> getItems(String text) {
@@ -155,12 +118,6 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text));
-    }
-
-
-    private void checkOwner(Long ownerId) {
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
 
     @Override
@@ -185,4 +142,47 @@ public class ItemServiceImpl implements ItemService {
         return newComment;
 
     }
+
+    private List<ItemsDto> fillWithBookingInfo(List<Item> items, Long userId) {
+        //получили все комменты и букинги
+        Map<Item, List<Comment>> comments = commentRepository.findByItemIn(items, Sort.by(DESC, "created"))
+                .stream()
+                .collect(groupingBy(Comment::getItem, toList()));
+        Map<Item, List<Booking>> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED, Sort.by(DESC, "start"))
+                .stream()
+                .collect(groupingBy(Booking::getItem, toList()));
+        LocalDateTime now = LocalDateTime.now();
+        return items.stream().map(item -> addBookingAndComment(item, userId, comments.getOrDefault(item, List.of()),
+                        bookings.getOrDefault(item, List.of()), now))
+                .collect(toList());
+    }
+
+    private ItemsDto addBookingAndComment(Item item, Long userId, List<Comment> comments, List<Booking> bookings, LocalDateTime now) {
+        if (!item.getOwner().getId().equals(userId)) {
+            return ItemMapper.toItemsDto(item, null, null, CommentMapper.commentDtoList(comments));
+        }
+
+        Booking lastBooking = bookings.stream()
+                .filter(b -> !b.getStart().isAfter(now))
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .findFirst()
+                .orElse(null);
+
+        Booking nextBooking = bookings.stream()
+                .filter(b -> b.getStart().isAfter(now))
+                .reduce((a, b) -> a.getStart().isBefore(b.getStart()) ? a : b)
+                .orElse(null);
+
+        ItemBookingInfoDto lastBookingDto = lastBooking != null
+                ? BookingMapper.toItemBookingInfoDto(lastBooking) : null;
+        ItemBookingInfoDto nextBookingDto = nextBooking != null
+                ? BookingMapper.toItemBookingInfoDto(nextBooking) : null;
+        return ItemMapper.toItemsDto(item, lastBookingDto, nextBookingDto, CommentMapper.commentDtoList(comments));
+    }
+
+    private void checkOwner(Long ownerId) {
+        userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+    }
+
 }
