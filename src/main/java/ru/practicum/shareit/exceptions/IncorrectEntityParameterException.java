@@ -1,10 +1,10 @@
-package ru.practicum.shareit.item.exception;
+package ru.practicum.shareit.exceptions;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public class IncorrectItemParameterException extends RuntimeException {
+public class IncorrectEntityParameterException extends RuntimeException {
     private final String parameter;
 }
