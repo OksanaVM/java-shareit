@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
@@ -106,18 +108,20 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemsDto> getItems(Long ownerId) {
+    public List<ItemsDto> getItems(Long ownerId, int from, int size) {
+        Pageable page = PageRequest.of(from / size, size);
         checkOwner(ownerId);
-        return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId), ownerId);
+        return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId,page), ownerId);
     }
 
     @Transactional
     @Override
-    public List<ItemDto> getItems(String text) {
+    public List<ItemDto> getItems(String text, int from, int size) {
+        Pageable page = PageRequest.of(from / size, size);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text));
+        return ItemMapper.toItemDtoList(itemRepository.findAllItemsByLike(text, page));
     }
 
     @Override

@@ -9,6 +9,8 @@ import ru.practicum.shareit.item.dto.ItemsDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.util.HeaderConstants;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -18,8 +20,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping()
-    public List<ItemsDto> getItems(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId) {
-        return itemService.getItems(ownerId);
+    public List<ItemsDto> getItems(@RequestHeader(value = HeaderConstants.OWNER_ID) Long ownerId,
+                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
+        return itemService.getItems(ownerId, from, size);
     }
 
     @GetMapping("/{id}")
@@ -29,8 +33,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItems(@RequestParam(name = "text") String text) {
-        return itemService.getItems(text);
+    public List<ItemDto> getItems(@RequestParam(name = "text") String text,
+                                  @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                  @Positive @RequestParam(defaultValue = "10") Integer size) {
+        return itemService.getItems(text, from, size);
     }
 
     @PostMapping()
