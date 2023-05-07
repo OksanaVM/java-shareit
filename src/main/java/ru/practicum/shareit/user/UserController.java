@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
+//ksjach/askj
     @GetMapping()
     public List<UserDto> getUsers() {
         return userService.getUsersList();
