@@ -111,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemsDto> getItems(Long ownerId, int from, int size) {
         Pageable page = PageRequest.of(from / size, size);
         checkOwner(ownerId);
-        return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId,page), ownerId);
+        return fillWithBookingInfo(itemRepository.findAllByOwnerIdOrderById(ownerId, page), ownerId);
     }
 
     @Transactional

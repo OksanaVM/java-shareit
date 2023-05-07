@@ -1,8 +1,8 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -14,16 +14,16 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ItemRequestServiceImpl implements ItemRequestService{
+@RequiredArgsConstructor
+public class ItemRequestServiceImpl implements ItemRequestService {
 
     private final ItemRepository itemRepository;
     private final ItemRequestRepository itemRequestRepository;
@@ -31,41 +31,38 @@ public class ItemRequestServiceImpl implements ItemRequestService{
 
 
     @Override
+    @Transactional
     public ItemRequestDto create(long userId, ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = new ItemRequest();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-
         itemRequest.setRequestor(user);
-
         itemRequest.setCreated(LocalDateTime.now());
         if (itemRequestDto.getDescription() == null) {
             throw new NotFoundException("Описание не может быть пустым");
         }
         itemRequest.setDescription(itemRequestDto.getDescription());
         itemRequestRepository.save(itemRequest);
-
         return ItemRequestMapper.toItemRequestDto(itemRequest);
     }
 
+
+    @Transactional(readOnly = true)
     @Override
-    public ItemRequestDto getById(Long userId, Long id) {
-         userRepository.findById(userId)
+    public ItemRequestDto getById(long userId, long id) {
+        userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        Optional<ItemRequest> itemRequestOptional = itemRequestRepository.findById(id);
-        if (itemRequestOptional.isPresent()) {
-            ItemRequest itemRequest = itemRequestOptional.get();
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Запрос не найден"));
 
-            ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
-            List<Item> itemList = itemRepository.findByRequestId(itemRequestDto.getId());
-            itemRequestDto.setItems(ItemMapper.toItemDtoList(itemList));
+        ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest);
+        List<Item> itemList = itemRepository.findByRequestId(itemRequestDto.getId());
+        itemRequestDto.setItems(ItemMapper.toItemDtoList(itemList));
 
-            return itemRequestDto;
-        } else {
-            throw new IncorrectEntityParameterException("Запрос не найден");
-        }
+        return itemRequestDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getAllUserRequest(Long userId) {
         User requestor = userRepository.findById(userId)
@@ -80,6 +77,7 @@ public class ItemRequestServiceImpl implements ItemRequestService{
     }
 
     // получить список ВCЕХ запросов, созданных другими пользователями
+    @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getAllRequest(Long userId, Integer from, Integer size) {
         List<ItemRequest> itemRequestList;

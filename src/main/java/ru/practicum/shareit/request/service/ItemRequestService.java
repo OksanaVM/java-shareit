@@ -8,7 +8,7 @@ public interface ItemRequestService {
 
     ItemRequestDto create(long userId, ItemRequestDto itemRequestDto);
 
-    ItemRequestDto getById(Long userId, Long requestId);
+    ItemRequestDto getById(long userId, long id);
 
     List<ItemRequestDto> getAllUserRequest(Long userId);
 

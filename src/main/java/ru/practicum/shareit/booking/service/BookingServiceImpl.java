@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
@@ -112,10 +111,10 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime now = LocalDateTime.now();
         switch (stateFromText) {
             case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findAllByBooker_IdOrderByStartDesc(userId,page));
+                return BookingMapper.toBookingDtoList(bookingRepository.findAllByBooker_IdOrderByStartDesc(userId, page));
             case CURRENT:
                 return BookingMapper.toBookingDtoList(bookingRepository
-                        .findAllByBooker_IdAndEndIsAfterAndStartIsBeforeOrderByStartDesc(userId, now, now,page));
+                        .findAllByBooker_IdAndEndIsAfterAndStartIsBeforeOrderByStartDesc(userId, now, now, page));
             case PAST:
                 return BookingMapper.toBookingDtoList(bookingRepository
                         .findAllByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, now, page));

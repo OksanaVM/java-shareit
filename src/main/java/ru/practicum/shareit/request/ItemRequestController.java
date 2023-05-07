@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +10,6 @@ import ru.practicum.shareit.util.HeaderConstants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -34,6 +31,7 @@ public class ItemRequestController {
                                          @PathVariable Long id) {
         return requestService.getById(userId, id);
     }
+
     @GetMapping
     public List<ItemRequestDto> getAllUserRequest(
             @RequestHeader(value = HeaderConstants.OWNER_ID) Long userId) {
@@ -42,8 +40,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> getAllRequests(@RequestHeader(value = HeaderConstants.OWNER_ID) Long userId,
-            @RequestParam(required = false, name = "from") Integer from,
-            @RequestParam(required = false, name = "size") Integer size) {
+                                               @RequestParam(required = false, name = "from") Integer from,
+                                               @RequestParam(required = false, name = "size") Integer size) {
         return requestService.getAllRequest(userId, from, size);
     }
 }

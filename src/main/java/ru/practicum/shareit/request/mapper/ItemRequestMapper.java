@@ -5,7 +5,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
