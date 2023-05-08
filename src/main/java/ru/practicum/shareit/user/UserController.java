@@ -33,7 +33,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public UserDto update(@PathVariable Long id, @Validated(Update.class) @RequestBody UserDto user) {
-        return userService.updateUser(new UserDto(id, user.getName(), user.getEmail()));
+        return userService.updateUser(id, user);
     }
 
     @DeleteMapping("/{id}")

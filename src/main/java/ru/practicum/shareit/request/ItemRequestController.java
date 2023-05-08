@@ -10,6 +10,8 @@ import ru.practicum.shareit.util.HeaderConstants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -40,8 +42,10 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestDto> getAllRequests(@RequestHeader(value = HeaderConstants.OWNER_ID) Long userId,
-                                               @RequestParam(required = false, name = "from") Integer from,
-                                               @RequestParam(required = false, name = "size") Integer size) {
+                                               @PositiveOrZero
+                                               @RequestParam(name = "from", defaultValue = "0") int from,
+                                               @Positive @RequestParam(name = "size", required = false,
+                                                       defaultValue = "10") int size) {
         return requestService.getAllRequest(userId, from, size);
     }
 }

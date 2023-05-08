@@ -1,9 +1,10 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -80,21 +81,19 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getAllRequest(Long userId, Integer from, Integer size) {
-        List<ItemRequest> itemRequestList;
-        if (from == null || size == null) {
-            itemRequestList = itemRequestRepository.findAll();
-            return ItemRequestMapper.toItemRequestDtoList(itemRequestList);
-        } else if (from < 0 || size <= 0) {
-            throw new IncorrectEntityParameterException("Неверные параметры");
-        } else {
-            User requestor = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-            itemRequestList = itemRequestRepository.findByRequestorLimits(requestor.getId(), from, size);
-            List<ItemRequestDto> itemRequestDtoList = ItemRequestMapper.toItemRequestDtoList(itemRequestList);
-            addItems(itemRequestDtoList);
-            itemRequestDtoList = sortItemRequestList(itemRequestDtoList);
-            return itemRequestDtoList;
-        }
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        Sort sort = Sort.by(Sort.Direction.DESC, "created");
+        PageRequest pageRequest = PageRequest.of(from / size, size, sort);
+        List<ItemRequestDto> itemRequestDtoList = itemRequestRepository.findAllByRequestorIdNot(
+                        userId,
+                        pageRequest)
+                .stream()
+                .map(ItemRequestMapper::toItemRequestDto)
+                .collect(Collectors.toList());
+
+        addItems(itemRequestDtoList);
+        return itemRequestDtoList;
     }
 
 
