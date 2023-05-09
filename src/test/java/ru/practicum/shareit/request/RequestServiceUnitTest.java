@@ -56,7 +56,7 @@ public class RequestServiceUnitTest {
         user = new User(1L, "name", "email@mail.com");
         itemRequestDto = new ItemRequestDto(1L, "description", null, LocalDateTime.now(), new ArrayList<>());
         itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, user);
-        item = new Item(1L, "name", "description", true, 1l, null);
+        item = new Item(1L, "name", "description", true, 1L, null);
     }
 
     @Test
