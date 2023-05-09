@@ -25,18 +25,15 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -59,8 +56,9 @@ public class RequestServiceUnitTest {
         user = new User(1L, "name", "email@mail.com");
         itemRequestDto = new ItemRequestDto(1L, "description", null, LocalDateTime.now(), new ArrayList<>());
         itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, user);
-        item = new Item(1L, "name", "description", true, 1l,null);
+        item = new Item(1L, "name", "description", true, 1l, null);
     }
+
     @Test
     public void shouldSuccessCreate() {
         User requestor = new User(1L, "sss@email.ru", "Sasha");

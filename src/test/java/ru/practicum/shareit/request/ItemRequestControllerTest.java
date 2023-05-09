@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.shareit.exceptions.ErrorHandler;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -24,20 +22,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
 
     @Autowired
-    private ObjectMapper  objectMapper;
+    private ObjectMapper objectMapper;
     @MockBean
     private ItemRequestService itemRequestService;
     @InjectMocks
@@ -49,10 +44,11 @@ public class ItemRequestControllerTest {
     private User user;
 
     private static final String BASE_PATH_REQUESTS = "/requests";
+
     @BeforeEach
     void start() throws Exception {
         user = new User(1L, "name", "email@mail.com");
-        itemRequestDto = new ItemRequestDto(1L, "description",null, LocalDateTime.now(), new ArrayList<>());
+        itemRequestDto = new ItemRequestDto(1L, "description", null, LocalDateTime.now(), new ArrayList<>());
     }
 
     @Test

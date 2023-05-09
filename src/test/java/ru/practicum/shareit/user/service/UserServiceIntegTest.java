@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,7 +81,7 @@ public class UserServiceIntegTest {
     }
 
     @Test
-        void deleteUser() {
+    void deleteUser() {
         UserDto userDto = new UserDto(1L, "testUser", "test@email.com");
         userService.addUser(userDto);
 
