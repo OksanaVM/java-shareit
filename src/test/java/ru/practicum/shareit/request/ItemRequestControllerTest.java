@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.util.HeaderConstants;
@@ -65,7 +64,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void getRequestsInformation() throws Exception {
-        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, user);
+        ItemRequestMapper.toItemRequest(itemRequestDto, user);
         when(itemRequestService.getAllUserRequest(anyLong()))
                 .thenReturn(List.of(itemRequestDto));
         mockMvc.perform(get("/requests")

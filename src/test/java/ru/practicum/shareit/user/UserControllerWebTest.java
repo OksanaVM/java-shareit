@@ -86,6 +86,7 @@ public class UserControllerWebTest {
     void update() throws Exception {
         when(userService.updateUser(anyLong(), any(UserDto.class)))
                 .thenReturn(userDto);
+
         mockMvc.perform(patch("/users/1")
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)

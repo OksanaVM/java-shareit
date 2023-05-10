@@ -48,7 +48,6 @@ public class RequestServiceUnitTest {
     private ItemRequest itemRequest;
     private Item item;
 
-
     private final ItemRequestService requestService = new ItemRequestServiceImpl(mockItemRepository, mockItemRequestRepository, mockUserRepository);
 
     @BeforeEach
@@ -164,7 +163,6 @@ public class RequestServiceUnitTest {
     @Test
     public void getAllUserRequest_withInvalidUserId_shouldThrowNotFoundException() {
         Long userId = 1L;
-
         when(mockUserRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> itemRequestService.getAllUserRequest(userId));

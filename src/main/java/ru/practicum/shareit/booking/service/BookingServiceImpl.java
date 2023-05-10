@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +20,12 @@ import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.exceptions.TimeDataException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -99,6 +106,32 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Неверные параметры");
         }
     }
+
+//    public static BookingDto toBookingDto(Booking booking) {
+//        BookingDto dto = new BookingDto();
+//        dto.setId(booking.getId());
+//        dto.setBooker(UserMapper.toUserDto(booking.getBooker()));
+//        dto.setStart(booking.getStart());
+//        dto.setEnd(booking.getEnd());
+//        dto.setItem(ItemMapper.toItemDto(booking.getItem()));
+//        dto.setStatus(booking.getStatus());
+//        return dto;
+//    }
+//
+//    @Data
+//    @Builder
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    public class BookingDto {
+//        private Long id;
+//        private LocalDateTime start;
+//        private LocalDateTime end;
+//        private Long itemId;
+//        private ItemDto item;
+//        private UserDto booker;
+//        private BookingStatus status;
+//    }
+
 
     @Transactional
     @Override

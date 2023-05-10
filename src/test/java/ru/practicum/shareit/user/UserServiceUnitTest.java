@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.service;
+package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,6 @@ public class UserServiceUnitTest {
         List<UserDto> users = userService.getUsersList();
         assertThat(users, equalTo(List.of(userDto, user2Dto)));
     }
-
 
     @Test
     public void editUserThrowNotFoundExceptionWhenUserNotExists() {
