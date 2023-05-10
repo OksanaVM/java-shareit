@@ -10,12 +10,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -24,6 +29,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.practicum.shareit.booking.mapper.BookingMapper.toItemBookingInfoDto;
 
 @Transactional
 @SpringBootTest(
@@ -127,5 +134,61 @@ public class BookingServiceIntegrationTest {
         assertThat(userBookingsList, hasSize(1));
         assertThat(userBookingsList.get(0).getId(), equalTo(bookingDto.getId()));
     }
+
+    @Test
+    public void testGetStateFromText_ValidInput() {
+        String text = "CURRENT";
+        BookingState expected = BookingState.CURRENT;
+        BookingState actual = BookingState.getStateFromText(text);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetStateFromText_InvalidInput() {
+        String text = "INVALID";
+        try {
+            BookingState.getStateFromText(text);
+            fail("Expected RequestFailedException to be thrown");
+        } catch (RequestFailedException e) {
+            assertEquals("Unknown state: INVALID", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testToItemBookingInfoDto_positive() {
+        //Given
+        Booking booking = Booking.builder()
+                .id(1L)
+                .booker(User.builder().id(2L).build())
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1))
+                .build();
+        //When
+        ItemBookingInfoDto itemBookingInfoDto = toItemBookingInfoDto(booking);
+        //Then
+        assertEquals(1L, itemBookingInfoDto.getId());
+        assertEquals(2L, itemBookingInfoDto.getBookerId());
+        assertEquals(booking.getStart(), itemBookingInfoDto.getStart());
+        assertEquals(booking.getEnd(), itemBookingInfoDto.getEnd());
+    }
+
+    @Test
+    public void testToItemBookingInfoDto_negative() {
+        //Given
+        Booking booking = Booking.builder()
+                .id(1L)
+                .booker(User.builder().id(2L).build())
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1))
+                .build();
+        //When
+        ItemBookingInfoDto itemBookingInfoDto = toItemBookingInfoDto(booking);
+        //Then
+        assertNotEquals(2L, itemBookingInfoDto.getId());
+        assertNotEquals(1L, itemBookingInfoDto.getBookerId());
+        assertNotEquals(booking.getStart(), itemBookingInfoDto.getEnd());
+        assertNotEquals(booking.getEnd(), itemBookingInfoDto.getStart());
+    }
+
 
 }

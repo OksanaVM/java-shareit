@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class ErrorHandler {
 
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectEntityParameterException(final IncorrectEntityParameterException e) {
@@ -30,13 +29,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleRequestFailedException(RequestFailedException exception) {
-        log.warn("400 {}", exception.getMessage());
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTimeDataException(TimeDataException exception) {
         log.warn("400 {}", exception.getMessage());
         return new ErrorResponse(exception.getMessage());
     }

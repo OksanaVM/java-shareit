@@ -1,7 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.util.HeaderConstants;
 
@@ -130,6 +133,25 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
+    }
+
+
+    @Test
+    public void shouldFailOnApproveWithErrorParam() throws Exception {
+        Mockito.when(
+                        bookingService.approve(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean())
+                )
+                .thenThrow(new IncorrectEntityParameterException("Неверные параметры"));
+
+        mvc.perform(patch("/bookings/{bookingId}", "1")
+                        .header(HeaderConstants.OWNER_ID, 2L)
+                        .param("approved", "true")
+                        .content(mapper.writeValueAsString(bookingDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertNotNull(result.getResolvedException()));
     }
 
 }

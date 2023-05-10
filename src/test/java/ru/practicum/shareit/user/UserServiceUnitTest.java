@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserServiceImpl;
@@ -18,6 +19,8 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -85,4 +88,18 @@ public class UserServiceUnitTest {
         verify(repository, times(1)).deleteById(anyLong());
     }
 
+    @Test
+    public void testToUserDto() {
+        User user = new User(1L, "Test Name", "test@example.com");
+        UserDto userDto = UserMapper.toUserDto(user);
+        assertEquals(1L, userDto.getId());
+        assertEquals("Test Name", userDto.getName());
+        assertEquals("test@example.com", userDto.getEmail());
+
+        user = new User(2L, "", null);
+        userDto = UserMapper.toUserDto(user);
+        assertEquals(2L, userDto.getId());
+        assertEquals("", userDto.getName());
+        assertNull(userDto.getEmail());
+    }
 }

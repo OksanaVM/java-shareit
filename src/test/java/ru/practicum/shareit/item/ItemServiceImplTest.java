@@ -221,6 +221,8 @@ public class ItemServiceImplTest {
         Exception exception = assertThrows(NotFoundException.class, () -> itemService.addComment(authorId, itemId, commentDto));
         assertEquals("Автор не найден", exception.getMessage());
     }
+
+
 }
 
 
