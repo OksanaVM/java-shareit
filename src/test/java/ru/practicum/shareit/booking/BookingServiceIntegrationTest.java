@@ -14,12 +14,14 @@ import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -42,6 +44,8 @@ public class BookingServiceIntegrationTest {
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     private final UserDto owner = new UserDto(null, "testUser", "test@email.com");
     private final UserDto booker = new UserDto(null, "testUser2", "test2@email.com");
@@ -140,6 +144,24 @@ public class BookingServiceIntegrationTest {
         BookingState expected = BookingState.CURRENT;
         BookingState actual = BookingState.getStateFromText(text);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetStateFromText() {
+        // Positive Test Cases
+        assertEquals(BookingState.ALL, BookingState.getStateFromText("ALL"));
+        assertEquals(BookingState.CURRENT, BookingState.getStateFromText("CURRENT"));
+        assertEquals(BookingState.PAST, BookingState.getStateFromText("PAST"));
+        assertEquals(BookingState.FUTURE, BookingState.getStateFromText("FUTURE"));
+        assertEquals(BookingState.WAITING, BookingState.getStateFromText("WAITING"));
+        assertEquals(BookingState.REJECTED, BookingState.getStateFromText("REJECTED"));
+        // Negative Test Cases
+        try {
+            BookingState.getStateFromText("INVALID");
+            fail("Expected an RequestFailedException to be thrown");
+        } catch (RequestFailedException e) {
+            assertEquals("Unknown state: INVALID", e.getMessage());
+        }
     }
 
     @Test

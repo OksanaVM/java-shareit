@@ -14,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dto.AuthorDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemsDto;
@@ -23,6 +25,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -47,6 +50,14 @@ public class ItemServiceImplTest {
     private CommentRepository commentRepository;
     @Mock
     private BookingRepository bookingRepository;
+    @Mock
+    private CommentDto commentDto;
+    @Mock
+    private BookingService bookingService;
+
+    private UserDto userDto;
+    private ItemDto itemDto;
+    private UserDto secondUserFromDB;
 
     @Test
     void addItem_whenValidParametersProvided_thenItemAdded() {
@@ -222,7 +233,55 @@ public class ItemServiceImplTest {
         assertEquals("Автор не найден", exception.getMessage());
     }
 
+    @Test
+    public void testGettersSetters() {
+        commentDto = CommentDto.builder()
+                .id(1L)
+                .text("This is a comment")
+                .author(AuthorDto.builder().id(2L).authorName("John").build())
+                .authorName("John")
+                .created(LocalDateTime.now())
+                .build();
+        // Arrange
+        Long newId = 0L;
+        String newText = "Updated comment";
+        AuthorDto newAuthor = AuthorDto.builder().id(4L).authorName("Jane").build();
+        String newAuthorName = "Jane";
+        LocalDateTime newCreated = LocalDateTime.now().plusDays(1);
 
+        // Act
+        commentDto.setId(newId);
+        commentDto.setText(newText);
+        commentDto.setAuthor(newAuthor);
+        commentDto.setAuthorName(newAuthorName);
+        commentDto.setCreated(newCreated);
+
+        // Assert
+        assertEquals(newId, commentDto.getId());
+        assertEquals(newText, commentDto.getText());
+        assertEquals(newAuthor, commentDto.getAuthor());
+        assertEquals(newAuthorName, commentDto.getAuthorName());
+        assertEquals(newCreated, commentDto.getCreated());
+    }
+
+    @Test
+    public void testToString() {
+        commentDto = CommentDto.builder()
+                .id(1L)
+                .text("This is a comment")
+                .author(AuthorDto.builder().id(2L).authorName("John").build())
+                .authorName("John")
+                .created(LocalDateTime.now())
+                .build();
+        // Arrange
+        String expectedString = "CommentDto(id=1, text=This is a comment, author=AuthorDto(id=2, authorName=John, email=null), authorName=John, created=" + commentDto.getCreated().toString() + ")";
+
+        // Act
+        String resultString = commentDto.toString();
+
+        // Assert
+        assertEquals(expectedString, resultString);
+    }
 }
 
 
