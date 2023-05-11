@@ -14,7 +14,6 @@ import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -43,7 +42,7 @@ public class BookingServiceIntegrationTest {
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
-    private final BookingRepository bookingRepository;
+
     private final UserDto owner = new UserDto(null, "testUser", "test@email.com");
     private final UserDto booker = new UserDto(null, "testUser2", "test2@email.com");
     private final ItemDto itemDtoToCreate = ItemDto.builder().name("testItem").description("testDescription").available(true).build();
@@ -156,16 +155,16 @@ public class BookingServiceIntegrationTest {
 
     @Test
     public void testToItemBookingInfoDto_positive() {
-        //Given
+
         Booking booking = Booking.builder()
                 .id(1L)
                 .booker(User.builder().id(2L).build())
                 .start(LocalDateTime.now())
                 .end(LocalDateTime.now().plusDays(1))
                 .build();
-        //When
+
         ItemBookingInfoDto itemBookingInfoDto = toItemBookingInfoDto(booking);
-        //Then
+
         assertEquals(1L, itemBookingInfoDto.getId());
         assertEquals(2L, itemBookingInfoDto.getBookerId());
         assertEquals(booking.getStart(), itemBookingInfoDto.getStart());
@@ -174,16 +173,16 @@ public class BookingServiceIntegrationTest {
 
     @Test
     public void testToItemBookingInfoDto_negative() {
-        //Given
+
         Booking booking = Booking.builder()
                 .id(1L)
                 .booker(User.builder().id(2L).build())
                 .start(LocalDateTime.now())
                 .end(LocalDateTime.now().plusDays(1))
                 .build();
-        //When
+
         ItemBookingInfoDto itemBookingInfoDto = toItemBookingInfoDto(booking);
-        //Then
+
         assertNotEquals(2L, itemBookingInfoDto.getId());
         assertNotEquals(1L, itemBookingInfoDto.getBookerId());
         assertNotEquals(booking.getStart(), itemBookingInfoDto.getEnd());

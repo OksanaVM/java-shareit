@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -8,7 +11,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Entity
