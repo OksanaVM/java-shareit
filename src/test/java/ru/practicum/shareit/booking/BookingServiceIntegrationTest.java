@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -209,6 +210,30 @@ public class BookingServiceIntegrationTest {
         assertNotEquals(1L, itemBookingInfoDto.getBookerId());
         assertNotEquals(booking.getStart(), itemBookingInfoDto.getEnd());
         assertNotEquals(booking.getEnd(), itemBookingInfoDto.getStart());
+    }
+
+    @Test
+    public void approve_withInvalidOwnerId_shouldThrowNotFoundException() {
+        // Arrange
+        Long ownerId = 3L;
+        Long bookingId = 2L;
+        boolean approved = true;
+        // Act
+        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.approve(ownerId, bookingId, approved));
+        // Assert
+        assertEquals("Брони с такой ID нет", exception.getMessage());
+    }
+
+    @Test
+    public void approve_withInvalidBookingId_shouldThrowNotFoundException() {
+        // Arrange
+        Long ownerId = 1L;
+        Long bookingId = 4L;
+        boolean approved = true;
+        // Act
+        Exception exception = assertThrows(NotFoundException.class, () -> bookingService.approve(ownerId, bookingId, approved));
+        // Assert
+        assertEquals("Брони с такой ID нет", exception.getMessage());
     }
 
 

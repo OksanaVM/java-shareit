@@ -12,6 +12,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -20,12 +21,13 @@ import ru.practicum.shareit.item.dto.AuthorDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemsDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -33,7 +35,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -55,9 +57,6 @@ public class ItemServiceImplTest {
     @Mock
     private BookingService bookingService;
 
-    private UserDto userDto;
-    private ItemDto itemDto;
-    private UserDto secondUserFromDB;
 
     @Test
     void addItem_whenValidParametersProvided_thenItemAdded() {
@@ -101,7 +100,7 @@ public class ItemServiceImplTest {
         User owner = new User(1L, "John", "Doe");
         Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.of(new Item(itemId, "Test Item", "This is a test item", true, null, owner)));
         Mockito.when(commentRepository.findByItemIn(Mockito.anyList(), Mockito.any(Sort.class))).thenReturn(Collections.emptyList());
-        Mockito.when(bookingRepository.findByItemInAndStatus(Mockito.anyList(), Mockito.eq(BookingStatus.APPROVED), Mockito.any(Sort.class))).thenReturn(Collections.emptyList());
+        Mockito.when(bookingRepository.findByItemInAndStatus(Mockito.anyList(), eq(BookingStatus.APPROVED), Mockito.any(Sort.class))).thenReturn(Collections.emptyList());
 
         ItemsDto result = itemService.getItem(itemId, userId);
 
@@ -206,7 +205,7 @@ public class ItemServiceImplTest {
                 new Item(2L, "Test Item 2", "This is a test item 2", true, null, null),
                 new Item(3L, "Another Item", "This is another item", true, null, null)
         );
-        Mockito.when(itemRepository.findAllItemsByLike(Mockito.eq(searchText), Mockito.eq(page))).thenReturn(itemList);
+        Mockito.when(itemRepository.findAllItemsByLike(eq(searchText), eq(page))).thenReturn(itemList);
 
         List<ItemDto> result = itemService.getItems(searchText, from, size);
 
@@ -242,21 +241,19 @@ public class ItemServiceImplTest {
                 .authorName("John")
                 .created(LocalDateTime.now())
                 .build();
-        // Arrange
+
         Long newId = 0L;
         String newText = "Updated comment";
         AuthorDto newAuthor = AuthorDto.builder().id(4L).authorName("Jane").build();
         String newAuthorName = "Jane";
         LocalDateTime newCreated = LocalDateTime.now().plusDays(1);
 
-        // Act
         commentDto.setId(newId);
         commentDto.setText(newText);
         commentDto.setAuthor(newAuthor);
         commentDto.setAuthorName(newAuthorName);
         commentDto.setCreated(newCreated);
 
-        // Assert
         assertEquals(newId, commentDto.getId());
         assertEquals(newText, commentDto.getText());
         assertEquals(newAuthor, commentDto.getAuthor());
@@ -273,15 +270,36 @@ public class ItemServiceImplTest {
                 .authorName("John")
                 .created(LocalDateTime.now())
                 .build();
-        // Arrange
+
         String expectedString = "CommentDto(id=1, text=This is a comment, author=AuthorDto(id=2, authorName=John, email=null), authorName=John, created=" + commentDto.getCreated().toString() + ")";
 
-        // Act
         String resultString = commentDto.toString();
 
-        // Assert
         assertEquals(expectedString, resultString);
     }
+
+    @Test
+    void shouldCreateComment() {
+        Item item1 = new Item(1L, "item1", "description Item1", true, 1L, null);
+        User user1 = new User(1L, "userName", "user@mail.ru");
+        Booking bookingLast = new Booking(1L, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), item1, user1, BookingStatus.APPROVED);
+        Comment comment1 = new Comment(1L, "text comment1", item1, user1, LocalDateTime.now());
+        CommentDto commentDto1 = CommentMapper.toCommentDto(comment1);
+        CommentDto commentDtoOutput = CommentMapper.toCommentDto(comment1);
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(bookingRepository.findBookingsByItem(any(), eq(BookingStatus.APPROVED), anyLong(), any(LocalDateTime.class))).thenReturn(List.of(bookingLast));
+        when(commentRepository.save(any())).thenReturn(comment1);
+
+        CommentDto commentDtoOutputAfter = itemService.addComment(1L, 1L, commentDto1);
+        assertEquals(commentDtoOutput.getId(), commentDtoOutputAfter.getId());
+        assertEquals(commentDtoOutput.getText(), commentDtoOutputAfter.getText());
+        assertEquals(commentDtoOutput.getAuthorName(), commentDtoOutputAfter.getAuthorName());
+        assertEquals(commentDtoOutput.getCreated(), commentDtoOutputAfter.getCreated());
+    }
+
+
 }
 
 

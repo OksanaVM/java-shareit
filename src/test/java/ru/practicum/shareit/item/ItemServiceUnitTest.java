@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.item.dto.AuthorDto;
@@ -24,22 +22,21 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceUnitTest {
-
 
     private BookingRepository mockBookingRepository;
     private UserRepository mockUserRepository;
     private ItemRepository mockItemRepository;
     private CommentRepository mockCommentRepository;
+
+
     private final User owner = new User(1L, "eee@email.ru", "Eva");
     private final Item item = new Item(1L, "carpet", "description", true, null, owner);
 
     private final User booker = new User(2L, "ppp@email.ru", "Polina");
-    private final Booking booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now(), item, booker, BookingStatus.APPROVED);
 
     private final ItemService itemService = new ItemServiceImpl(mockUserRepository, mockItemRepository, mockBookingRepository, mockCommentRepository);
 
@@ -47,16 +44,16 @@ public class ItemServiceUnitTest {
     @Test
     public void shouldFailAddItemWithIncorrectParam() {
         ItemDto newItem = new ItemDto(null, null, null, null, null);
-        IncorrectEntityParameterException exception = Assertions.assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
+        IncorrectEntityParameterException exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
         Assertions.assertNotNull(exception);
 
         ItemDto newItemWithoutName = new ItemDto(null, null, null, true, null);
-        exception = Assertions.assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
+        exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
         Assertions.assertNotNull(exception);
         assertEquals(exception.getParameter(), "Название не может быть пустой");
 
         ItemDto newItemWithoutDescription = new ItemDto(null, "name", null, true, null);
-        exception = Assertions.assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));
+        exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));
         Assertions.assertNotNull(exception, "Описание не может быть пустой");
     }
 
@@ -105,6 +102,5 @@ public class ItemServiceUnitTest {
         assertEquals("John Doe", authorDto.getAuthorName());
         assertEquals("john@example.com", authorDto.getEmail());
     }
-
 
 }
