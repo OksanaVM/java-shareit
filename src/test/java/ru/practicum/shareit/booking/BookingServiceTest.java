@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -37,6 +38,7 @@ public class BookingServiceTest {
     private UserService userService;
     @Mock
     private ItemService itemService;
+    private ItemServiceImpl itemServicei;
 
     private final User user = new User(1L, "testUser", "test@email.com");
     private final UserDto userDto = new UserDto(1L, "testUser", "test@email.com");

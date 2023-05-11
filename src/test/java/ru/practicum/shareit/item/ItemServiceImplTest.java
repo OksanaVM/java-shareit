@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.AuthorDto;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -54,8 +53,6 @@ public class ItemServiceImplTest {
     private BookingRepository bookingRepository;
     @Mock
     private CommentDto commentDto;
-    @Mock
-    private BookingService bookingService;
 
 
     @Test
@@ -94,6 +91,39 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    public void update_validOwnerIdAndItemId_returnsUpdatedItemDto() {
+        // Arrange
+        Long ownerId = 1L;
+        Long itemId = 2L;
+        ItemDto itemDto = new ItemDto(1L, "test1", "description1", true, null);
+        itemDto.setName("test");
+        itemDto.setDescription("test description");
+        itemDto.setAvailable(true);
+        itemDto.setRequestId(3L);
+        User user = new User();
+        user.setId(ownerId);
+        Item oldItem = new Item();
+        oldItem.setId(itemId);
+        oldItem.setOwner(user);
+        oldItem.setName("old name");
+        oldItem.setDescription("old description");
+        oldItem.setIsAvailable(false);
+        oldItem.setRequestId(4L);
+        when(userRepository.findById(ownerId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(oldItem));
+        when(itemRepository.save(any(Item.class))).thenAnswer(i -> i.getArguments()[0]);
+        // Act
+        ItemDto result = itemService.update(ownerId, itemId, itemDto);
+        // Assert
+        assertNotNull(result);
+        assertEquals(itemId, result.getId());
+        assertEquals("test", result.getName());
+        assertEquals("test description", result.getDescription());
+        assertTrue(result.getAvailable());
+        assertEquals(3L, result.getRequestId());
+    }
+
+    @Test
     public void testGetExistingItem() {
         Long itemId = 1L;
         Long userId = 2L;
@@ -113,6 +143,17 @@ public class ItemServiceImplTest {
         assertNull(result.getLastBooking());
         assertNull(result.getNextBooking());
         assertTrue(result.getComments().isEmpty());
+    }
+
+    @Test
+    public void update_invalidOwnerId_throwsNotFoundException() {
+        // Arrange
+        Long ownerId = 1L;
+        Long itemId = 2L;
+        ItemDto itemDto = new ItemDto(1L, "test1", "description1", true, null);
+        when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> itemService.update(ownerId, itemId, itemDto));
     }
 
 
@@ -221,6 +262,18 @@ public class ItemServiceImplTest {
         assertEquals("This is a test item 2", result.get(1).getDescription());
         assertTrue(result.get(1).getAvailable());
         assertNull(result.get(1).getRequestId());
+    }
+
+    @Test
+    public void getItems_withBlankText_shouldReturnEmptyList() {
+        // Arrange
+        String text = "";
+        int from = 0;
+        int size = 10;
+        // Act
+        List<ItemDto> actualResult = itemService.getItems(text, from, size);
+        // Assert
+        assertTrue(actualResult.isEmpty());
     }
 
     @Test

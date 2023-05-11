@@ -149,14 +149,12 @@ public class BookingServiceIntegrationTest {
 
     @Test
     public void testGetStateFromText() {
-        // Positive Test Cases
         assertEquals(BookingState.ALL, BookingState.getStateFromText("ALL"));
         assertEquals(BookingState.CURRENT, BookingState.getStateFromText("CURRENT"));
         assertEquals(BookingState.PAST, BookingState.getStateFromText("PAST"));
         assertEquals(BookingState.FUTURE, BookingState.getStateFromText("FUTURE"));
         assertEquals(BookingState.WAITING, BookingState.getStateFromText("WAITING"));
         assertEquals(BookingState.REJECTED, BookingState.getStateFromText("REJECTED"));
-        // Negative Test Cases
         try {
             BookingState.getStateFromText("INVALID");
             fail("Expected an RequestFailedException to be thrown");

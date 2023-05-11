@@ -19,8 +19,7 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -101,5 +100,40 @@ public class UserServiceUnitTest {
         assertEquals(2L, userDto.getId());
         assertEquals("", userDto.getName());
         assertNull(userDto.getEmail());
+    }
+
+    @Test
+    public void testId() {
+        UserDto userDto = new UserDto();
+        userDto.setId(1L);
+        assertEquals(1L, userDto.getId());
+    }
+
+    @Test
+    public void testNamePositive() {
+        UserDto userDto = new UserDto();
+        userDto.setName("John");
+        assertEquals("John", userDto.getName());
+    }
+
+    @Test
+    public void testNameNegative() {
+        UserDto userDto = new UserDto();
+        userDto.setName("");
+        assertNotEquals("John", userDto.getName());
+    }
+
+    @Test
+    public void testEmailPositive() {
+        UserDto userDto = new UserDto();
+        userDto.setEmail("john@example.com");
+        assertEquals("john@example.com", userDto.getEmail());
+    }
+
+    @Test
+    public void testEmailNegative() {
+        UserDto userDto = new UserDto();
+        userDto.setEmail("invalidemail");
+        assertNotEquals("john@example.com", userDto.getEmail());
     }
 }
