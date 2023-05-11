@@ -46,5 +46,4 @@ public class RequestServiceIntegTest {
         userDto.setName("Tanya");
         userService.addUser(userDto);
     }
-
 }
