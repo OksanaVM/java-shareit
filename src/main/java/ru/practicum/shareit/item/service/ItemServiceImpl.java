@@ -100,12 +100,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    @Transactional
-    @Override
-    public ItemsDto getItem(Long itemId, Long userId) {
-        Item newItem = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
-        return fillWithBookingInfo(List.of(newItem), userId).get(0);
-    }
 
     @Transactional
     @Override
@@ -148,6 +142,13 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    @Transactional
+    @Override
+    public ItemsDto getItem(Long itemId, Long userId) {
+        Item newItem = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+        return fillWithBookingInfo(List.of(newItem), userId).get(0);
+    }
+
     private List<ItemsDto> fillWithBookingInfo(List<Item> items, Long userId) {
         //получили все комменты и букинги
         Map<Item, List<Comment>> comments = commentRepository.findByItemIn(items, Sort.by(DESC, "created"))
@@ -162,7 +163,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(toList());
     }
 
-    private ItemsDto addBookingAndComment(Item item, Long userId, List<Comment> comments, List<Booking> bookings, LocalDateTime now) {
+    public ItemsDto addBookingAndComment(Item item, Long userId, List<Comment> comments, List<Booking> bookings, LocalDateTime now) {
         if (!item.getOwner().getId().equals(userId)) {
             return ItemMapper.toItemsDto(item, null, null, CommentMapper.commentDtoList(comments));
         }

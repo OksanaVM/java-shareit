@@ -16,9 +16,11 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -43,10 +45,13 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toItemBookingInf
 public class BookingServiceIntegrationTest {
 
     private final BookingService bookingService;
+
+    private final BookingServiceImpl bookingServicei;
     private final UserService userService;
     private final ItemService itemService;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
 
     private final UserDto owner = new UserDto(null, "testUser", "test@email.com");
     private final UserDto booker = new UserDto(null, "testUser2", "test2@email.com");
@@ -140,6 +145,25 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
+    public void checkDates_PositiveTestCase() {
+        BookingDtoShort bookingDto = new BookingDtoShort();
+        bookingDto.setStart(LocalDateTime.now());
+        bookingDto.setEnd(LocalDateTime.now().plusDays(1));
+        bookingServicei.checkDates(bookingDto);
+    }
+
+    @Test
+    public void checkDates_NegativeTestCase() {
+        BookingDtoShort bookingDto = new BookingDtoShort();
+        bookingDto.setStart(LocalDateTime.now());
+        bookingDto.setEnd(LocalDateTime.now());
+
+        assertThrows(RequestFailedException.class, () -> {
+            bookingServicei.checkDates(bookingDto);
+        });
+    }
+
+    @Test
     public void testGetStateFromText_ValidInput() {
         String text = "CURRENT";
         BookingState expected = BookingState.CURRENT;
@@ -212,25 +236,24 @@ public class BookingServiceIntegrationTest {
 
     @Test
     public void approve_withInvalidOwnerId_shouldThrowNotFoundException() {
-        // Arrange
         Long ownerId = 3L;
         Long bookingId = 2L;
         boolean approved = true;
-        // Act
+
         Exception exception = assertThrows(NotFoundException.class, () -> bookingService.approve(ownerId, bookingId, approved));
-        // Assert
+
+
         assertEquals("Брони с такой ID нет", exception.getMessage());
     }
 
     @Test
     public void approve_withInvalidBookingId_shouldThrowNotFoundException() {
-        // Arrange
         Long ownerId = 1L;
         Long bookingId = 4L;
         boolean approved = true;
-        // Act
+
         Exception exception = assertThrows(NotFoundException.class, () -> bookingService.approve(ownerId, bookingId, approved));
-        // Assert
+
         assertEquals("Брони с такой ID нет", exception.getMessage());
     }
 

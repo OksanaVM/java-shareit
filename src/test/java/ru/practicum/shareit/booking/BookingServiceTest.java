@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -66,24 +67,20 @@ public class BookingServiceTest {
 
     @Test
     public void testGetBookingNotFound() {
-        // Arrange
         Long bookerId = 1L;
         Long bookingId = 2L;
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.empty());
-
         try {
-            // Act
+
             bookingService.getBooking(bookerId, bookingId);
             fail("Expected NotFoundException to be thrown");
         } catch (NotFoundException ex) {
-            // Assert
             assertEquals("Брони с таким id нет", ex.getMessage());
         }
     }
 
     @Test
     public void testGetBookingInvalidParameters() {
-        // Arrange
         Long bookerId = 1L;
         Long bookingId = 2L;
         User booker = User.builder().id(4L).build();
@@ -99,15 +96,29 @@ public class BookingServiceTest {
                 .end(LocalDateTime.of(2023, 5, 14, 18, 0))
                 .build();
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
-
         try {
-            // Act
             bookingService.getBooking(bookerId, bookingId);
             fail("Expected NotFoundException to be thrown");
         } catch (NotFoundException ex) {
-            // Assert
             assertEquals("Неверные параметры", ex.getMessage());
         }
+    }
+
+    @Test
+    public void getBooking_returnsBookingDto() {
+        // Arrange
+        Long bookerId = 1L;
+        Long bookingId = 2L;
+        Booking booking = new Booking();
+        booking.setId(bookingId);
+        booking.setBooker(new User(bookerId, "name", "bbbb@mail.ru"));
+        booking.setItem(new Item());
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        BookingDto result = bookingService.getBooking(bookerId, bookingId);
+        assertEquals(result.getId(), booking.getId());
+        assertEquals(result.getBooker().getId(), booking.getBooker().getId());
+
     }
 
 

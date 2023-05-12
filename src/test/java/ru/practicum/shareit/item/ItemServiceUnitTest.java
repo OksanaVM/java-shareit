@@ -58,6 +58,21 @@ public class ItemServiceUnitTest {
     }
 
     @Test
+    public void testAddItemNullOwnerId() {
+        // Создаем объект itemDto
+        ItemDto itemDto = new ItemDto(null, "Laptop", "A high-performance laptop", true, null);
+
+        // Проверяем, что метод выбросит исключение
+        Exception exception = assertThrows(IncorrectEntityParameterException.class, () -> {
+            itemService.addItem(null, itemDto);
+        });
+
+        // Проверяем сообщение исключения
+        String expectedMessage = "Owner ID не может быть null";
+        Assertions.assertNotNull(exception, expectedMessage);
+    }
+
+    @Test
     public void shouldMapToCommentDtoList() {
         User author = new User(3L, "sabrina@email.ru", "Sabrina");
         Comment comment1 = new Comment(1L, "text1", item, author, LocalDateTime.now());

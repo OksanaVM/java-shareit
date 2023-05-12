@@ -160,7 +160,7 @@ public class BookingServiceImpl implements BookingService {
         throw new RequestFailedException(String.format("Unknown state: %s", state));
     }
 
-    private void checkDates(BookingDtoShort bookingDto) {
+    public void checkDates(BookingDtoShort bookingDto) {
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
                 bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new RequestFailedException("Ошибка со временем бронирования");

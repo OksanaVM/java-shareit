@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.IncorrectEntityParameterException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.AuthorDto;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -147,15 +148,50 @@ public class ItemServiceImplTest {
 
     @Test
     public void update_invalidOwnerId_throwsNotFoundException() {
-        // Arrange
         Long ownerId = 1L;
         Long itemId = 2L;
         ItemDto itemDto = new ItemDto(1L, "test1", "description1", true, null);
         when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
-        // Act & Assert
+
         assertThrows(NotFoundException.class, () -> itemService.update(ownerId, itemId, itemDto));
     }
 
+    @Test
+    public void testAddBookingAndComment() {
+        // Создаем необходимые объекты
+        User owner = new User(1L, "John", "john@example.com");
+        Item item = Item.builder()
+                .id(1L)
+                .name("Laptop")
+                .description("A high-performance laptop")
+                .owner(owner)
+                .build();
+        List<Comment> comments = List.of(
+                new Comment(1L, "Great laptop", item, owner, LocalDateTime.now()),
+                new Comment(2L, "I love it", item, owner, LocalDateTime.now())
+        );
+        List<Booking> bookings = List.of(
+                new Booking(1L, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), item, owner, BookingStatus.APPROVED),
+                new Booking(2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item, owner, BookingStatus.APPROVED)
+        );
+        LocalDateTime now = LocalDateTime.now();
+
+        // Вызываем тестируемый метод
+        ItemsDto result = itemService.addBookingAndComment(item, 1L, comments, bookings, now);
+
+        assertNotNull(result);
+        assertEquals(item.getId(), result.getId());
+        assertEquals(item.getName(), result.getName());
+        assertEquals(item.getDescription(), result.getDescription());
+        assertNull(result.getAvailable());
+        assertNull(result.getRequestId());
+        assertNotNull(result.getLastBooking());
+        assertNotNull(result.getNextBooking());
+        assertNotNull(result.getComments());
+        assertEquals(comments.size(), result.getComments().size());
+        assertEquals(comments.get(0).getId(), result.getComments().get(0).getId());
+        assertEquals(comments.get(1).getId(), result.getComments().get(1).getId());
+    }
 
     @Test
     public void getItem_invalidInput_throwsNotFoundException() {
@@ -283,6 +319,43 @@ public class ItemServiceImplTest {
         CommentDto commentDto = new CommentDto(1L, "This is a test comment", null, "z", LocalDateTime.now());
         Exception exception = assertThrows(NotFoundException.class, () -> itemService.addComment(authorId, itemId, commentDto));
         assertEquals("Автор не найден", exception.getMessage());
+    }
+
+    @Test
+    public void addComment_authorHasNotBookedItem_throwsIncorrectEntityParameterException() {
+        // Arrange
+        Long authorId = 1L;
+        Long itemId = 2L;
+        CommentDto commentDto = new CommentDto();
+        User user = new User();
+        user.setId(authorId);
+        Item item = new Item();
+        item.setId(itemId);
+        when(userRepository.findById(authorId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(bookingRepository.findBookingsByItem(item, BookingStatus.APPROVED, authorId, LocalDateTime.now())).thenReturn(Collections.emptyList());
+
+        // Act & Assert
+        assertThrows(IncorrectEntityParameterException.class, () -> {
+            itemService.addComment(authorId, itemId, commentDto);
+        });
+    }
+
+    @Test
+    public void addComment_itemNotFound_throwsNotFoundException() {
+        // Arrange
+        Long authorId = 1L;
+        Long itemId = 2L;
+        CommentDto commentDto = new CommentDto();
+        User user = new User();
+        user.setId(authorId);
+        when(userRepository.findById(authorId)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> {
+            itemService.addComment(authorId, itemId, commentDto);
+        });
     }
 
     @Test
