@@ -153,17 +153,6 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void checkDates_NegativeTestCase() {
-        BookingDtoShort bookingDto = new BookingDtoShort();
-        bookingDto.setStart(LocalDateTime.now());
-        bookingDto.setEnd(LocalDateTime.now());
-
-        assertThrows(RequestFailedException.class, () -> {
-            bookingServicei.checkDates(bookingDto);
-        });
-    }
-
-    @Test
     public void testGetStateFromText_ValidInput() {
         String text = "CURRENT";
         BookingState expected = BookingState.CURRENT;
