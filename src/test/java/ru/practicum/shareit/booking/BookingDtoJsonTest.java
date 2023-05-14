@@ -23,7 +23,7 @@ public class BookingDtoJsonTest {
 
     @Test
     void testItemDto() throws IOException {
-        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         ItemDto itemDto = ItemDto.builder()
                 .id(1L)
@@ -50,8 +50,8 @@ public class BookingDtoJsonTest {
         JsonContent<BookingDto> result = json.write(bookingDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).extractingJsonPathStringValue("$.start").isEqualTo(dateTime.plusSeconds(1).toString());
-        assertThat(result).extractingJsonPathStringValue("$.end").isEqualTo(dateTime.plusSeconds(2).toString());
+        assertThat(result).extractingJsonPathStringValue("$.start").isEqualTo(dateTime.plusSeconds(1).truncatedTo(ChronoUnit.SECONDS).toString());
+        assertThat(result).extractingJsonPathStringValue("$.end").isEqualTo(dateTime.plusSeconds(2).truncatedTo(ChronoUnit.SECONDS).toString());
         assertThat(result).extractingJsonPathNumberValue("$.item.id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.item.name").isEqualTo("Дрель1");
         assertThat(result).extractingJsonPathStringValue("$.item.description").isEqualTo("не простая дерель");
