@@ -23,7 +23,7 @@ public class BookingDtoJsonTest {
 
     @Test
     void testItemDto() throws IOException {
-        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
 
         ItemDto itemDto = ItemDto.builder()
                 .id(1L)
