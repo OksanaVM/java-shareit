@@ -23,7 +23,7 @@ public class RequestDtoJsonTest {
 
     @Test
     void testItemDto() throws IOException {
-        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         ItemDto itemDto = ItemDto.builder()
                 .id(1L)
                 .name("Дрель")
