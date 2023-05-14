@@ -7,24 +7,20 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.dto.ItemBookingInfoDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -36,7 +32,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.practicum.shareit.booking.mapper.BookingMapper.toItemBookingInfoDto;
 
-@Transactional
+
 @SpringBootTest(
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -45,13 +41,9 @@ import static ru.practicum.shareit.booking.mapper.BookingMapper.toItemBookingInf
 public class BookingServiceIntegrationTest {
 
     private final BookingService bookingService;
-
     private final BookingServiceImpl bookingServicei;
     private final UserService userService;
     private final ItemService itemService;
-    private final UserRepository userRepository;
-    private final BookingRepository bookingRepository;
-    private final ItemRepository itemRepository;
 
     private final UserDto owner = new UserDto(null, "testUser", "test@email.com");
     private final UserDto booker = new UserDto(null, "testUser2", "test2@email.com");
@@ -70,9 +62,9 @@ public class BookingServiceIntegrationTest {
 
     @Test
     void createBooking() {
-        userService.addUser(owner);
+        UserDto createdOwner = userService.addUser(owner);
         UserDto createdBooker = userService.addUser(booker);
-        ItemDto itemDto = itemService.addItem(1L, itemDtoToCreate);
+        ItemDto itemDto = itemService.addItem(createdOwner.getId(), itemDtoToCreate);
 
         BookingDto createdBooking = bookingService.addBooking(createdBooker.getId(), bookingToCreate);
 
@@ -153,14 +145,6 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    public void testGetStateFromText_ValidInput() {
-        String text = "CURRENT";
-        BookingState expected = BookingState.CURRENT;
-        BookingState actual = BookingState.getStateFromText(text);
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void testGetStateFromText() {
         assertEquals(BookingState.ALL, BookingState.getStateFromText("ALL"));
         assertEquals(BookingState.CURRENT, BookingState.getStateFromText("CURRENT"));
@@ -179,12 +163,10 @@ public class BookingServiceIntegrationTest {
     @Test
     public void testGetStateFromText_InvalidInput() {
         String text = "INVALID";
-        try {
+        RequestFailedException exception = assertThrows(RequestFailedException.class, () -> {
             BookingState.getStateFromText(text);
-            fail("Expected RequestFailedException to be thrown");
-        } catch (RequestFailedException e) {
-            assertEquals("Unknown state: INVALID", e.getMessage());
-        }
+        });
+        assertEquals("Unknown state: INVALID", exception.getMessage());
     }
 
     @Test

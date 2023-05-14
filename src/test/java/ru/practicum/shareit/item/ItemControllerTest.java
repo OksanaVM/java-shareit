@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemsDto;
+import ru.practicum.shareit.item.dto.OutputItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.util.HeaderConstants;
 
@@ -35,7 +35,6 @@ public class ItemControllerTest {
     private ObjectMapper mapper;
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private ItemService itemService;
 
@@ -65,7 +64,7 @@ public class ItemControllerTest {
         Long itemId = 1L;
         Long userId = 2L;
 
-        ItemsDto itemDto = ItemsDto.builder()
+        OutputItemDto itemDto = OutputItemDto.builder()
                 .id(itemId)
                 .name("test item")
                 .description("test description")
@@ -90,14 +89,14 @@ public class ItemControllerTest {
         Integer from = 0;
         Integer size = 10;
 
-        List<ItemsDto> items = List.of(
-                ItemsDto.builder()
+        List<OutputItemDto> items = List.of(
+                OutputItemDto.builder()
                         .id(1L)
                         .name("test item 1")
                         .description("test description 1")
                         .available(true)
                         .build(),
-                ItemsDto.builder()
+                OutputItemDto.builder()
                         .id(2L)
                         .name("test item 2")
                         .description("test description 2")

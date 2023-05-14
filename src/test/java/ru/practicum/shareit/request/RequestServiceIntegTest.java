@@ -23,7 +23,6 @@ public class RequestServiceIntegTest {
     private final ItemRequestService requestService;
     private final UserService userService;
 
-
     @BeforeEach
 
     public void setUp() {

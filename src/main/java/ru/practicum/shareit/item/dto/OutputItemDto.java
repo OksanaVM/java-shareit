@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Getter
 @Builder
-public class ItemsDto {
+public class OutputItemDto {
     private final Long id;
     private final String name;
     private final String description;

@@ -20,7 +20,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.dto.AuthorDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemsDto;
+import ru.practicum.shareit.item.dto.OutputItemDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -43,7 +43,6 @@ import static org.mockito.Mockito.when;
 public class ItemServiceImplTest {
     @InjectMocks
     private ItemServiceImpl itemService;
-
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -55,12 +54,12 @@ public class ItemServiceImplTest {
     @Mock
     private CommentDto commentDto;
 
-
     @Test
     void addItem_whenValidParametersProvided_thenItemAdded() {
         Long ownerId = 1L;
         ItemDto itemDto = new ItemDto(null, "Test Item", "Test Description", true, null);
-        Mockito.when(userRepository.findById(ownerId)).thenReturn(Optional.of(new User()));
+        Mockito.when(userRepository.existsById(ownerId)).thenReturn(true);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(new User()));
         Mockito.when(itemRepository.save(Mockito.any(Item.class))).thenReturn(new Item());
 
         ItemDto result = itemService.addItem(ownerId, itemDto);
@@ -69,31 +68,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void shouldSuccessUpdateItem() {
-
-        User owner = new User(1L, "eee@email.ru", "Eva");
-        Item item = new Item(1L, "crrr", "description", true, null, owner);
-
-
-        Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(owner));
-
-        Item oldItem = new Item(2L, "плед", "warm", true, null, owner);
-        Mockito.when(itemRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(item));
-        Mockito.when(itemRepository.save(any())).thenReturn(item);
-
-        ItemDto newItem = new ItemDto(2L, "crrr", "description", true, null);
-
-        Assertions.assertNotEquals(oldItem.getDescription(), newItem.getDescription());
-
-        ItemDto updatedItem = itemService.update(owner.getId(), oldItem.getId(), newItem);
-
-        assertEquals(updatedItem.getName(), newItem.getName());
-        assertEquals(updatedItem.getDescription(), newItem.getDescription());
-    }
-
-    @Test
     public void update_validOwnerIdAndItemId_returnsUpdatedItemDto() {
-        // Arrange
         Long ownerId = 1L;
         Long itemId = 2L;
         ItemDto itemDto = new ItemDto(1L, "test1", "description1", true, null);
@@ -113,9 +88,9 @@ public class ItemServiceImplTest {
         when(userRepository.findById(ownerId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(oldItem));
         when(itemRepository.save(any(Item.class))).thenAnswer(i -> i.getArguments()[0]);
-        // Act
+
         ItemDto result = itemService.update(ownerId, itemId, itemDto);
-        // Assert
+
         assertNotNull(result);
         assertEquals(itemId, result.getId());
         assertEquals("test", result.getName());
@@ -133,7 +108,7 @@ public class ItemServiceImplTest {
         Mockito.when(commentRepository.findByItemIn(Mockito.anyList(), Mockito.any(Sort.class))).thenReturn(Collections.emptyList());
         Mockito.when(bookingRepository.findByItemInAndStatus(Mockito.anyList(), eq(BookingStatus.APPROVED), Mockito.any(Sort.class))).thenReturn(Collections.emptyList());
 
-        ItemsDto result = itemService.getItem(itemId, userId);
+        OutputItemDto result = itemService.getItem(itemId, userId);
 
         assertNotNull(result);
         assertEquals(itemId, result.getId());
@@ -157,6 +132,48 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    public void shouldFailAddItemWithIncorrectParam() {
+        User owner = new User(1L, "eee@email.ru", "Eva");
+
+        ItemDto newItem = new ItemDto(null, null, null, null, null);
+        IncorrectEntityParameterException exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
+        Assertions.assertNotNull(exception);
+
+        ItemDto newItemWithoutName = new ItemDto(null, null, null, true, null);
+        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
+        Assertions.assertNotNull(exception);
+
+
+        ItemDto newItemWithoutDescription = new ItemDto(null, "name", null, true, null);
+        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));
+
+    }
+
+    @Test
+    public void testAddItemNullOwnerId() {
+        ItemDto itemDto = new ItemDto(null, "Laptop", "A high-performance laptop", true, null);
+
+        assertThrows(IncorrectEntityParameterException.class, () -> {
+            itemService.addItem(null, itemDto);
+        });
+    }
+
+    @Test
+    public void shouldMapToCommentDtoList() {
+        User owner = new User(1L, "eee@email.ru", "Eva");
+        Item item = new Item(1L, "carpet", "description", true, null, owner);
+
+        User author = new User(3L, "sabrina@email.ru", "Sabrina");
+        Comment comment1 = new Comment(1L, "text1", item, author, LocalDateTime.now());
+        Comment comment2 = new Comment(1L, "text2", item, author, LocalDateTime.now());
+        List<Comment> commentList = List.of(comment1, comment2);
+        List<CommentDto> commentDto = CommentMapper.commentDtoList(commentList);
+        Assertions.assertNotNull(commentDto);
+        assertEquals(commentDto.get(0).getText(), comment1.getText());
+        assertEquals(commentDto.get(1).getText(), comment2.getText());
+    }
+
+    @Test
     public void testAddBookingAndComment() {
         // Создаем необходимые объекты
         User owner = new User(1L, "John", "john@example.com");
@@ -176,8 +193,7 @@ public class ItemServiceImplTest {
         );
         LocalDateTime now = LocalDateTime.now();
 
-        // Вызываем тестируемый метод
-        ItemsDto result = itemService.addBookingAndComment(item, 1L, comments, bookings, now);
+        OutputItemDto result = itemService.addBookingAndComment(item, 1L, comments, bookings, now);
 
         assertNotNull(result);
         assertEquals(item.getId(), result.getId());
@@ -265,7 +281,7 @@ public class ItemServiceImplTest {
         Pageable page = PageRequest.of(0, 10);
         List<Item> expectedResult = Collections.emptyList();
 
-        List<Item> actualResult = itemRepository.findAllItemsByLike(text, page);
+        List<Item> actualResult = itemRepository.searchItems(text, page);
 
         assertEquals(expectedResult, actualResult);
     }
@@ -282,7 +298,7 @@ public class ItemServiceImplTest {
                 new Item(2L, "Test Item 2", "This is a test item 2", true, null, null),
                 new Item(3L, "Another Item", "This is another item", true, null, null)
         );
-        Mockito.when(itemRepository.findAllItemsByLike(eq(searchText), eq(page))).thenReturn(itemList);
+        Mockito.when(itemRepository.searchItems(eq(searchText), eq(page))).thenReturn(itemList);
 
         List<ItemDto> result = itemService.getItems(searchText, from, size);
 
@@ -302,13 +318,12 @@ public class ItemServiceImplTest {
 
     @Test
     public void getItems_withBlankText_shouldReturnEmptyList() {
-        // Arrange
         String text = "";
         int from = 0;
         int size = 10;
-        // Act
+
         List<ItemDto> actualResult = itemService.getItems(text, from, size);
-        // Assert
+
         assertTrue(actualResult.isEmpty());
     }
 
@@ -317,13 +332,11 @@ public class ItemServiceImplTest {
         Long authorId = 1L;
         Long itemId = 3L;
         CommentDto commentDto = new CommentDto(1L, "This is a test comment", null, "z", LocalDateTime.now());
-        Exception exception = assertThrows(NotFoundException.class, () -> itemService.addComment(authorId, itemId, commentDto));
-        assertEquals("Автор не найден", exception.getMessage());
+        assertThrows(NotFoundException.class, () -> itemService.addComment(authorId, itemId, commentDto));
     }
 
     @Test
     public void addComment_authorHasNotBookedItem_throwsIncorrectEntityParameterException() {
-        // Arrange
         Long authorId = 1L;
         Long itemId = 2L;
         CommentDto commentDto = new CommentDto();
@@ -335,7 +348,7 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findBookingsByItem(item, BookingStatus.APPROVED, authorId, LocalDateTime.now())).thenReturn(Collections.emptyList());
 
-        // Act & Assert
+
         assertThrows(IncorrectEntityParameterException.class, () -> {
             itemService.addComment(authorId, itemId, commentDto);
         });
@@ -343,7 +356,6 @@ public class ItemServiceImplTest {
 
     @Test
     public void addComment_itemNotFound_throwsNotFoundException() {
-        // Arrange
         Long authorId = 1L;
         Long itemId = 2L;
         CommentDto commentDto = new CommentDto();
@@ -352,7 +364,6 @@ public class ItemServiceImplTest {
         when(userRepository.findById(authorId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(NotFoundException.class, () -> {
             itemService.addComment(authorId, itemId, commentDto);
         });

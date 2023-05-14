@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,14 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerWebTest {
     @MockBean
     private UserService userService;
-
-    @InjectMocks
-    private UserController userController;
     @Autowired
     private ObjectMapper mapper;
     @Autowired
     private MockMvc mockMvc;
-
     private static final String BASE_PATH_USERS = "/users";
     private final UserDto userDto = new UserDto(1L, "testUser", "test@email.com");
 

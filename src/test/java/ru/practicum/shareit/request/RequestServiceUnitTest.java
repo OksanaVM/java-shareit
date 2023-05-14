@@ -12,12 +12,9 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -49,10 +46,7 @@ public class RequestServiceUnitTest {
     private User user;
     private ItemRequestDto itemRequestDto;
     private ItemRequest itemRequest;
-    private BookingRepository bookingRepository;
-    private CommentRepository commentRepository;
     private Item item;
-    private ItemService itemService;
 
     private final ItemRequestService requestService = new ItemRequestServiceImpl(mockItemRepository, mockItemRequestRepository, mockUserRepository);
 
@@ -124,7 +118,7 @@ public class RequestServiceUnitTest {
     public void shouldSuccessGetItemRequest() {
         User requestor = new User(1L, "eee@email.ru", "Eva");
 
-        when(mockUserRepository.findById(1L)).thenReturn(Optional.of(requestor));
+        when(mockUserRepository.existsById(1L)).thenReturn(true);
         ItemRequest request = new ItemRequest(1L, "костюм клоуна", requestor, LocalDateTime.now());
         when(mockItemRequestRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(request));
         when(mockItemRepository.findByRequestId(Mockito.anyLong())).thenReturn(new ArrayList<>());
@@ -141,7 +135,7 @@ public class RequestServiceUnitTest {
         Integer size = 10;
         User user = new User();
         user.setId(userId);
-        when(mockUserRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(mockUserRepository.existsById(userId)).thenReturn(true);
 
         List<ItemRequest> itemRequests = new ArrayList<>();
         ItemRequest itemRequest = new ItemRequest();
