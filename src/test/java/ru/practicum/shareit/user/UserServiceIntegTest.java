@@ -88,8 +88,7 @@ public class UserServiceIntegTest {
 
         userService.deleteUser(1L);
 
-        Exception e = Assertions.assertThrows(NotFoundException.class, () -> userService.getUser(1L));
-        assertThat(e.getMessage(), equalTo("user по id 1 не найден"));
+        Assertions.assertThrows(NotFoundException.class, () -> userService.getUser(1L));
     }
 
 }

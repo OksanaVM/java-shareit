@@ -137,12 +137,10 @@ public class ItemServiceImplTest {
 
         ItemDto newItem = new ItemDto(null, null, null, null, null);
         IncorrectEntityParameterException exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
-        Assertions.assertNotNull(exception);
 
         ItemDto newItemWithoutName = new ItemDto(null, null, null, true, null);
         assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
         Assertions.assertNotNull(exception);
-
 
         ItemDto newItemWithoutDescription = new ItemDto(null, "name", null, true, null);
         assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));

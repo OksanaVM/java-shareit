@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -46,10 +47,12 @@ public class RequestDtoJsonTest {
                 .build();
 
         JsonContent<ItemRequestDto> result = json.write(itemRequestDto);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("Нужна новая вещь");
-        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo(dateTime.toString());
+        assertThat(result).extractingJsonPathStringValue("$.created")
+                .isEqualTo(dateTime.format(formatter));
         assertThat(result).extractingJsonPathNumberValue("$.requestor.id").isEqualTo(1);
         assertThat(result).extractingJsonPathNumberValue("$.items[0].id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.items[0].name").isEqualTo("Дрель");

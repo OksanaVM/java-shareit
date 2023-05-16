@@ -71,6 +71,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return itemRequestDtoList;
     }
 
+//    private void addItems(List<ItemRequestDto> itemRequestDtoList) {
+//        List<Long> requestIds = itemRequestDtoList.stream().map(ItemRequestDto::getId).collect(Collectors.toList());
+//        Map<Long, List<Item>> itemsByRequestId = itemRepository.findByRequestIdIn(requestIds).stream().collect(Collectors.groupingBy(Item::getRequestId));
+//        itemRequestDtoList.forEach(requestDto -> {
+//            List<Item> itemList = itemsByRequestId.getOrDefault(requestDto.getId(), Collections.emptyList());
+//            requestDto.setItems(ItemMapper.toItemDtoList(itemList));
+//        });
+//    }
+//
+//    List<Item> findByRequestIdIn(List<Long> requestIds);
+
     @Override
     public List<ItemRequestDto> getAllRequest(Long userId, Integer from, Integer size) {
         if (!userRepository.existsById(userId)) {

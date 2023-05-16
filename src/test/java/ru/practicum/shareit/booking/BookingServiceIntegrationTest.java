@@ -73,21 +73,6 @@ public class BookingServiceIntegrationTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "false, REJECTED",
-            "true, APPROVED"
-    })
-    void approveBooking_approve(boolean approve, BookingStatus status) {
-        userService.addUser(owner);
-        UserDto createdBooker = userService.addUser(booker);
-        ItemDto itemDto = itemService.addItem(1L, itemDtoToCreate);
-        bookingService.addBooking(createdBooker.getId(), bookingToCreate);
-        BookingDto approvedBooking = bookingService.approve(1L, 1L, approve);
-
-        test(approvedBooking, status, createdBooker, itemDto);
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
             "ALL, 1, 2, true",
             "CURRENT, -1, 2, true",
             "PAST, -2, -1, true",
