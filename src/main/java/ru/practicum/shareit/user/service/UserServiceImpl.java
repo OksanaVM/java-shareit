@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -35,8 +36,8 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public UserDto updateUser(UserDto userDto) {
-        User user = userRepository.findById(userDto.getId())
+    public UserDto updateUser(long userId, UserDto userDto) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("пользователь не найден " + userDto.getId()));
 
         if (userDto.getName() != null && !(userDto.getName().isBlank())) {
@@ -48,13 +49,11 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(user);
     }
 
-    @Transactional
     @Override
     public List<UserDto> getUsersList() {
         return UserMapper.toUserDtoList(userRepository.findAll());
     }
 
-    @Transactional
     @Override
     public UserDto getUser(Long id) {
         return UserMapper.toUserDto(userRepository.findById(id)
