@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
@@ -18,7 +17,6 @@ import java.util.List;
 
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class RequestRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
@@ -57,10 +55,13 @@ public class RequestRepositoryTest {
 
     @Test
     void createRequest() {
+        entityManager.persist(request);
+        entityManager.flush();
+
         ItemRequest createdRequest = requestRepository.save(request);
 
         Assertions.assertNotNull(createdRequest);
-        Assertions.assertEquals(1L, createdRequest.getId());
+        Assertions.assertEquals(request.getId(), createdRequest.getId());
         Assertions.assertEquals(request.getDescription(), createdRequest.getDescription());
         Assertions.assertEquals(request.getRequestor(), createdRequest.getRequestor());
         Assertions.assertEquals(request.getCreated(), createdRequest.getCreated());
@@ -71,10 +72,10 @@ public class RequestRepositoryTest {
         entityManager.persist(request);
         entityManager.flush();
 
-        ItemRequest found = requestRepository.findById(1L).orElse(null);
+        ItemRequest found = requestRepository.findById(request.getId()).orElse(null);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(request.getId(), found.getId());
         Assertions.assertEquals(request.getDescription(), found.getDescription());
         Assertions.assertEquals(request.getRequestor(), found.getRequestor());
         Assertions.assertEquals(request.getCreated(), found.getCreated());
@@ -85,10 +86,10 @@ public class RequestRepositoryTest {
         entityManager.persist(request);
         entityManager.persist(anotherRequest);
         entityManager.flush();
+        entityManager.persist(user);
 
-        Long user2Id = 2L;
         Page<ItemRequest> requests = requestRepository
-                .findAllByRequestorIdNot(user2Id, PageRequest.of(0, 1));
+                .findAllByRequestorIdNot(user.getId(), PageRequest.of(0, 1));
 
         Assertions.assertEquals(1, requests.getTotalPages());
         Assertions.assertEquals(1L, requests.getTotalElements());
@@ -103,7 +104,7 @@ public class RequestRepositoryTest {
         List<ItemRequest> requests = requestRepository.findByRequestorOrderByCreated(user);
 
         Assertions.assertEquals(1, requests.size());
-        Assertions.assertEquals(1L, requests.get(0).getId());
+        Assertions.assertEquals(request.getId(), requests.get(0).getId());
         Assertions.assertEquals(request.getDescription(), requests.get(0).getDescription());
         Assertions.assertEquals(request.getCreated(), requests.get(0).getCreated());
         Assertions.assertEquals(user, requests.get(0).getRequestor());
