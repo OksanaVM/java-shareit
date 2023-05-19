@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;

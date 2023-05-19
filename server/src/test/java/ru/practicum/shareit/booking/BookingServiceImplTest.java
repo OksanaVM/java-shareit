@@ -17,7 +17,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;

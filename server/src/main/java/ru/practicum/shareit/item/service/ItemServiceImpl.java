@@ -102,7 +102,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItems(String text, int from, int size) {
+    public List<ItemDto> getItems(long userId, String text, int from, int size) {
+        checkOwner(userId);
         Pageable page = PageRequest.of(from / size, size);
         if (text.isBlank()) {
             return Collections.emptyList();

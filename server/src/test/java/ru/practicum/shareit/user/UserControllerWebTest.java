@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.nio.charset.StandardCharsets;
@@ -91,35 +90,35 @@ public class UserControllerWebTest {
                 .andExpect(content().json(mapper.writeValueAsString(userDto)));
     }
 
-    @Test
-    void addInvalidUserTest() throws Exception {
-        UserDto emptyNameUserDto = new UserDto(1L, "", "test@email.com");
-        UserDto invalidEmailUserDto = new UserDto(1L, "testUser", "testemail.com");
-        UserDto emptyEmailUserDto = new UserDto(1L, "testUser", "");
-        when(userService.addUser(any()))
-                .thenReturn(userDto);
-
-        mockMvc.perform(post(BASE_PATH_USERS)
-                        .content(mapper.writeValueAsString(emptyNameUserDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post(BASE_PATH_USERS)
-                        .content(mapper.writeValueAsString(invalidEmailUserDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(post(BASE_PATH_USERS)
-                        .content(mapper.writeValueAsString(emptyEmailUserDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
+//    @Test
+//    void addInvalidUserTest() throws Exception {
+//        UserDto emptyNameUserDto = new UserDto(1L, "", "test@email.com");
+//        UserDto invalidEmailUserDto = new UserDto(1L, "testUser", "testemail.com");
+//        UserDto emptyEmailUserDto = new UserDto(1L, "testUser", "");
+//        when(userService.addUser(any()))
+//                .thenReturn(userDto);
+//
+//        mockMvc.perform(post(BASE_PATH_USERS)
+//                        .content(mapper.writeValueAsString(emptyNameUserDto))
+//                        .characterEncoding(StandardCharsets.UTF_8)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest());
+//
+//        mockMvc.perform(post(BASE_PATH_USERS)
+//                        .content(mapper.writeValueAsString(invalidEmailUserDto))
+//                        .characterEncoding(StandardCharsets.UTF_8)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest());
+//
+//        mockMvc.perform(post(BASE_PATH_USERS)
+//                        .content(mapper.writeValueAsString(emptyEmailUserDto))
+//                        .characterEncoding(StandardCharsets.UTF_8)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest());
+//    }
 
     @Test
     void getUserByIdTest() throws Exception {

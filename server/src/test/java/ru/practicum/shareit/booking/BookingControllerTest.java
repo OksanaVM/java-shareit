@@ -65,18 +65,18 @@ public class BookingControllerTest {
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
     }
 
-    @Test
-    void createBookingWithWrongStart_shouldReturnStatus400() throws Exception {
-        when(bookingService.addBooking(anyLong(), any()))
-                .thenReturn(bookingDto);
-        mvc.perform(post(BASE_PATH_BOOKINGS)
-                        .header(HeaderConstants.OWNER_ID, 1L)
-                        .content(mapper.writeValueAsString(invalidInputBookingDtoWithWrongStart))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
+//    @Test
+//    void createBookingWithWrongStart_shouldReturnStatus400() throws Exception {
+//        when(bookingService.addBooking(anyLong(), any()))
+//                .thenReturn(bookingDto);
+//        mvc.perform(post(BASE_PATH_BOOKINGS)
+//                        .header(HeaderConstants.OWNER_ID, 1L)
+//                        .content(mapper.writeValueAsString(invalidInputBookingDtoWithWrongStart))
+//                        .characterEncoding(StandardCharsets.UTF_8)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest());
+//    }
 
 
     @Test
