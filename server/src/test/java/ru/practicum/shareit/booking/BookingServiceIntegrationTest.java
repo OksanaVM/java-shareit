@@ -80,7 +80,7 @@ public class BookingServiceIntegrationTest {
             "WAITING, 1, 2, true",
             "REJECTED, 1, 2, false"
     })
-    void getAllBookingsByUser_ALL(String status, int start, int end, boolean approve) {
+    void getAllBookingsByUser_ALL(BookingState status, int start, int end, boolean approve) {
         BookingDtoShort booking = BookingDtoShort.builder().itemId(1L)
                 .start(LocalDateTime.now().plusHours(start))
                 .end(LocalDateTime.now().plusHours(end)).build();
@@ -105,7 +105,7 @@ public class BookingServiceIntegrationTest {
             "WAITING, 1, 2, true",
             "REJECTED, 1, 2, false"
     })
-    void getAllBookingsByOwner_ALL(String status, int start, int end, boolean approve) {
+    void getAllBookingsByOwner_ALL(BookingState status, int start, int end, boolean approve) {
         BookingDtoShort booking = BookingDtoShort.builder().itemId(1L)
                 .start(LocalDateTime.now().plusHours(start))
                 .end(LocalDateTime.now().plusHours(end)).build();
@@ -119,14 +119,6 @@ public class BookingServiceIntegrationTest {
         List<BookingDto> userBookingsList = bookingService.ownerItemsBookingLists(status, 1L, 0, 10);
         assertThat(userBookingsList, hasSize(1));
         assertThat(userBookingsList.get(0).getId(), equalTo(bookingDto.getId()));
-    }
-
-    @Test
-    public void checkDates_PositiveTestCase() {
-        BookingDtoShort bookingDto = new BookingDtoShort();
-        bookingDto.setStart(LocalDateTime.now());
-        bookingDto.setEnd(LocalDateTime.now().plusDays(1));
-        bookingServicei.checkDates(bookingDto);
     }
 
     @Test

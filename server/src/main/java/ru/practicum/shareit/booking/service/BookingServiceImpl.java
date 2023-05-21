@@ -38,8 +38,6 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     @Override
     public BookingDto addBooking(Long bookerId, BookingDtoShort bookingDto) {
-        checkDates(bookingDto);
-
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещи с таким id нет"));
 
@@ -97,14 +95,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBooking(String state, Long userId, int from, int size) {
+    public List<BookingDto> getBooking(BookingState state, Long userId, int from, int size) {
         userRepository.findById(userId).orElseThrow(() -> {
             throw new NotFoundException("Пользователь не найден");
         });
-        BookingState stateFromText = BookingState.getStateFromText(state);
+//        BookingState stateFromText = BookingState.getStateFromText(state);
         Pageable page = PageRequest.of(from / size, size);
         LocalDateTime now = LocalDateTime.now();
-        switch (stateFromText) {
+        switch (state) {
             case ALL:
                 return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId, page));
             case CURRENT:
@@ -128,14 +126,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> ownerItemsBookingLists(String state, Long ownerId, int from, int size) {
+    public List<BookingDto> ownerItemsBookingLists(BookingState state, Long ownerId, int from, int size) {
         userRepository.findById(ownerId).orElseThrow(() -> {
             throw new NotFoundException("Пользователь не найден");
         });
-        BookingState stateFromText = BookingState.getStateFromText(state);
+//        BookingState stateFromText = BookingState.getStateFromText(state);
         Pageable page = PageRequest.of(from / size, size);
         LocalDateTime now = LocalDateTime.now();
-        switch (stateFromText) {
+        switch (state) {
             case ALL:
                 return BookingMapper.toBookingDtoList(bookingRepository.findByOwnerItems(ownerId, page));
             case CURRENT:
@@ -154,10 +152,4 @@ public class BookingServiceImpl implements BookingService {
         throw new RequestFailedException(String.format("Unknown state: %s", state));
     }
 
-    public void checkDates(BookingDtoShort bookingDto) {
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
-                bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            throw new RequestFailedException("Ошибка со временем бронирования");
-        }
-    }
 }

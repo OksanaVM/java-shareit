@@ -49,28 +49,28 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto addItem(Long ownerId, ItemDto itemDto) {
-        if (ownerId == null) {
-            throw new IncorrectEntityParameterException("Owner ID не может быть null");
+//        if (ownerId == null) {
+//            throw new IncorrectEntityParameterException("Owner ID не может быть null");
+//        }
+//        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+//            throw new IncorrectEntityParameterException("Название не может быть пустой");
+//        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+//            throw new IncorrectEntityParameterException("Описание не может быть пустой");
+//        } else if (itemDto.getAvailable() == null) {
+//            throw new IncorrectEntityParameterException("Статус не может быть пустой");
+//        } else {
+        checkOwner(ownerId);
+        Item item = ItemMapper.toItem(itemDto);
+        if (itemDto.getRequestId() != null) {
+            item.setRequestId(itemDto.getRequestId());
         }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new IncorrectEntityParameterException("Название не может быть пустой");
-        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new IncorrectEntityParameterException("Описание не может быть пустой");
-        } else if (itemDto.getAvailable() == null) {
-            throw new IncorrectEntityParameterException("Статус не может быть пустой");
-        } else {
-            checkOwner(ownerId);
-            Item item = ItemMapper.toItem(itemDto);
-            if (itemDto.getRequestId() != null) {
-                item.setRequestId(itemDto.getRequestId());
-            }
-            Optional<User> user = userRepository.findById(ownerId);
-            item.setOwner(user.get());
-            Item newItem = itemRepository.save(item);
+        Optional<User> user = userRepository.findById(ownerId);
+        item.setOwner(user.get());
+        Item newItem = itemRepository.save(item);
 
-            return ItemMapper.toItemDto(newItem);
-        }
+        return ItemMapper.toItemDto(newItem);
     }
+
 
     @Transactional
     @Override

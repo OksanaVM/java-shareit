@@ -11,10 +11,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.RequestFailedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.UserDto;
@@ -112,7 +112,7 @@ public class BookingServiceImplTest {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingShortDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
         BookingDto secondBooking = bookingService.addBooking(secondTestUser.getId(), secondBookingShortDto);
-        List<BookingDto> bookings = bookingService.getBooking("ALL", secondTestUser.getId(), 0, 3);
+        List<BookingDto> bookings = bookingService.getBooking(BookingState.ALL, secondTestUser.getId(), 0, 3);
 
         assertThat(bookings.size(), equalTo(bookingDtos.size()));
         for (BookingDtoShort dto : bookingDtos) {
@@ -121,7 +121,7 @@ public class BookingServiceImplTest {
                     hasProperty("start", equalTo(dto.getStart())),
                     hasProperty("end", equalTo(dto.getEnd())))));
         }
-        List<BookingDto> approvedBookings = bookingService.getBooking("WAITING", secondTestUser.getId(), 0, 3);
+        List<BookingDto> approvedBookings = bookingService.getBooking(BookingState.WAITING, secondTestUser.getId(), 0, 3);
         BookingDto waitingBooking = approvedBookings.get(0);
 
         assertThat(approvedBookings.size(), equalTo(1));
@@ -136,7 +136,7 @@ public class BookingServiceImplTest {
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
         BookingDto secondBooking = bookingService.addBooking(secondTestUser.getId(), secondBookingShortDto);
 
-        List<BookingDto> bookings = bookingService.ownerItemsBookingLists("ALL", testUser.getId(), 0, 3);
+        List<BookingDto> bookings = bookingService.ownerItemsBookingLists(BookingState.ALL, testUser.getId(), 0, 3);
 
         assertThat(bookings.size(), equalTo(bookingDtos.size()));
         for (BookingDtoShort dto : bookingDtos) {
@@ -146,7 +146,7 @@ public class BookingServiceImplTest {
                     hasProperty("end", equalTo(dto.getEnd())))));
         }
 
-        List<BookingDto> approvedBookings = bookingService.ownerItemsBookingLists("WAITING", testUser.getId(), 0, 3);
+        List<BookingDto> approvedBookings = bookingService.ownerItemsBookingLists(BookingState.WAITING, testUser.getId(), 0, 3);
         BookingDto waitingBooking = approvedBookings.get(0);
 
         assertThat(approvedBookings.size(), equalTo(1));
@@ -163,21 +163,11 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getAllBookingsNonExistentStateTest() {
-        String nonExistentState = "nonExistentState";
-        bookingService.addBooking(secondTestUser.getId(), bookingShortDto);
-
-        Assertions.assertThrows(RequestFailedException.class,
-                () -> bookingService.getBooking(nonExistentState, secondTestUser.getId(), 0, 3));
-
-    }
-
-    @Test
     void getAllBookingsRejectedStateTest() {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingShortDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), false);
 
-        List<BookingDto> rejectedBookings = bookingService.getBooking("REJECTED", secondTestUser.getId(), 0, 3);
+        List<BookingDto> rejectedBookings = bookingService.getBooking(BookingState.REJECTED, secondTestUser.getId(), 0, 3);
         BookingDto rejectedBooking = rejectedBookings.get(0);
 
         assertThat(rejectedBookings.size(), equalTo(1));
@@ -195,7 +185,7 @@ public class BookingServiceImplTest {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
 
-        List<BookingDto> currentBookings = bookingService.getBooking("CURRENT", secondTestUser.getId(), 0, 3);
+        List<BookingDto> currentBookings = bookingService.getBooking(BookingState.CURRENT, secondTestUser.getId(), 0, 3);
         BookingDto currentBooking = currentBookings.get(0);
 
         assertThat(currentBookings.size(), equalTo(bookingDtos.size()));
@@ -212,7 +202,7 @@ public class BookingServiceImplTest {
         List<BookingDtoShort> bookingDtos = List.of(bookingDto);
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingDto);
 
-        List<BookingDto> futureBookings = bookingService.getBooking("FUTURE", secondTestUser.getId(), 0, 3);
+        List<BookingDto> futureBookings = bookingService.getBooking(BookingState.FUTURE, secondTestUser.getId(), 0, 3);
         BookingDto futureBooking = futureBookings.get(0);
 
         assertThat(futureBookings.size(), equalTo(bookingDtos.size()));
@@ -231,7 +221,7 @@ public class BookingServiceImplTest {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
 
-        List<BookingDto> pastBookings = bookingService.getBooking("PAST", secondTestUser.getId(), 0, 3);
+        List<BookingDto> pastBookings = bookingService.getBooking(BookingState.PAST, secondTestUser.getId(), 0, 3);
         BookingDto pastBooking = pastBookings.get(0);
 
         assertThat(pastBookings.size(), equalTo(bookingDtos.size()));
@@ -250,7 +240,7 @@ public class BookingServiceImplTest {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
 
-        List<BookingDto> futureBookings = bookingService.ownerItemsBookingLists("FUTURE", testUser.getId(), 0, 3);
+        List<BookingDto> futureBookings = bookingService.ownerItemsBookingLists(BookingState.FUTURE, testUser.getId(), 0, 3);
         BookingDto futureBooking = futureBookings.get(0);
 
         assertThat(futureBookings.size(), equalTo(bookingDtos.size()));
@@ -269,25 +259,12 @@ public class BookingServiceImplTest {
         BookingDto firstBooking = bookingService.addBooking(secondTestUser.getId(), bookingDto);
         bookingService.approve(testUser.getId(), firstBooking.getId(), true);
 
-        List<BookingDto> pastBookings = bookingService.ownerItemsBookingLists("PAST", testUser.getId(), 0, 3);
+        List<BookingDto> pastBookings = bookingService.ownerItemsBookingLists(BookingState.PAST, testUser.getId(), 0, 3);
         BookingDto pastBooking = pastBookings.get(0);
 
         assertThat(pastBookings.size(), equalTo(bookingDtos.size()));
         assertThat(pastBooking.getId(), equalTo(firstBooking.getId()));
         checkBookingsAreTheSame(pastBooking, bookingDto, secondTestUser, itemDtoFromDB, BookingStatus.APPROVED);
-    }
-
-
-    @Test
-    void createBookingItemStartLaterThanFinishTest() {
-        BookingDtoShort bookingDto = BookingDtoShort.builder()
-                .start(LocalDateTime.now().plusHours(2))
-                .end(LocalDateTime.now().plusHours(1))
-                .itemId(itemDtoFromDB.getId())
-                .build();
-
-        Assertions.assertThrows(RequestFailedException.class,
-                () -> bookingService.addBooking(secondTestUser.getId(), bookingDto));
     }
 
     private void checkBookingsAreTheSame(

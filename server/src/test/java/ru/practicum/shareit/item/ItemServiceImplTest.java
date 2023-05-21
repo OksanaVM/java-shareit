@@ -133,31 +133,31 @@ public class ItemServiceImplTest {
 
         assertThrows(NotFoundException.class, () -> itemService.update(ownerId, itemId, itemDto));
     }
+//
+//    @Test
+//    public void shouldFailAddItemWithIncorrectParam() {
+//        User owner = new User(1L, "eee@email.ru", "Eva");
+//
+//        ItemDto newItem = new ItemDto(null, null, null, null, null);
+//        IncorrectEntityParameterException exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
+//
+//        ItemDto newItemWithoutName = new ItemDto(null, null, null, true, null);
+//        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
+//        Assertions.assertNotNull(exception);
+//
+//        ItemDto newItemWithoutDescription = new ItemDto(null, "name", null, true, null);
+//        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));
+//
+//    }
 
-    @Test
-    public void shouldFailAddItemWithIncorrectParam() {
-        User owner = new User(1L, "eee@email.ru", "Eva");
-
-        ItemDto newItem = new ItemDto(null, null, null, null, null);
-        IncorrectEntityParameterException exception = assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItem));
-
-        ItemDto newItemWithoutName = new ItemDto(null, null, null, true, null);
-        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutName));
-        Assertions.assertNotNull(exception);
-
-        ItemDto newItemWithoutDescription = new ItemDto(null, "name", null, true, null);
-        assertThrows(IncorrectEntityParameterException.class, () -> itemService.addItem(owner.getId(), newItemWithoutDescription));
-
-    }
-
-    @Test
-    public void testAddItemNullOwnerId() {
-        ItemDto itemDto = new ItemDto(null, "Laptop", "A high-performance laptop", true, null);
-
-        assertThrows(IncorrectEntityParameterException.class, () -> {
-            itemService.addItem(null, itemDto);
-        });
-    }
+//    @Test
+//    public void testAddItemNullOwnerId() {
+//        ItemDto itemDto = new ItemDto(null, "Laptop", "A high-performance laptop", true, null);
+//
+//        assertThrows(IncorrectEntityParameterException.class, () -> {
+//            itemService.addItem(null, itemDto);
+//        });
+//    }
 
     @Test
     public void shouldMapToCommentDtoList() {
